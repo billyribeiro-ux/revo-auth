@@ -1,0 +1,14 @@
+node_modules
+dist
+.turbo
+.DS_Store
+.env
+.env.*
+!.env.example
+target
+.sqlx
+.docs-cache
+.revo-auth
+playwright-report
+test-results
+.astro
