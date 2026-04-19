@@ -67,10 +67,7 @@ pub fn session_cookie_value(token: &str, max_age_secs: i64, _secure: bool) -> St
 
 pub fn csrf_cookie_value(token: &str, max_age_secs: i64, _secure: bool) -> String {
     // __Host- prefix mandates Path=/, no Domain, and Secure — always.
-    format!(
-        "{}={token}; Path=/; SameSite=Lax; Max-Age={max_age_secs}; Secure",
-        auth::CSRF_COOKIE
-    )
+    format!("{}={token}; Path=/; SameSite=Lax; Max-Age={max_age_secs}; Secure", auth::CSRF_COOKIE)
 }
 
 pub fn clear_csrf_cookie(_secure: bool) -> String {

@@ -7,9 +7,7 @@ use std::time::Instant;
 use serde_json::json;
 use serial_test::serial;
 
-use crate::common::{
-    cookie_value, get_with_headers, post_json, post_json_with_session, setup,
-};
+use crate::common::{cookie_value, get_with_headers, post_json, post_json_with_session, setup};
 
 fn unique_email(label: &str) -> String {
     format!("{label}-{}@example.test", uuid::Uuid::now_v7().simple())
@@ -51,12 +49,8 @@ async fn session_endpoint_returns_user_after_signup() -> anyhow::Result<()> {
     )
     .await?;
     let cookie_hdr = common::cookies_to_header(&cookies);
-    let (status, body, _c) = get_with_headers(
-        &ctx,
-        "/v1/session",
-        &[(axum::http::header::COOKIE, cookie_hdr)],
-    )
-    .await?;
+    let (status, body, _c) =
+        get_with_headers(&ctx, "/v1/session", &[(axum::http::header::COOKIE, cookie_hdr)]).await?;
     assert_eq!(status, 200, "session status: body={body}");
     assert_eq!(body["session"]["user"]["email"], email);
     Ok(())
@@ -124,27 +118,16 @@ async fn signout_revokes_session() -> anyhow::Result<()> {
         &json!({ "email": email, "password": "Sup3r-strong-p@ssw0rd!" }),
     )
     .await?;
-    let csrf = cookie_value(&cookies, "__Host-revoauth.csrf")
-        .map(str::to_string)
-        .unwrap_or_default();
+    let csrf =
+        cookie_value(&cookies, "__Host-revoauth.csrf").map(str::to_string).unwrap_or_default();
 
-    let (s_out, _b, _c) = post_json_with_session(
-        &ctx,
-        "/v1/signout",
-        &json!({}),
-        &cookies,
-        Some(&csrf),
-    )
-    .await?;
+    let (s_out, _b, _c) =
+        post_json_with_session(&ctx, "/v1/signout", &json!({}), &cookies, Some(&csrf)).await?;
     assert_eq!(s_out, 204);
 
     let cookie_hdr = common::cookies_to_header(&cookies);
-    let (s_sess, body, _c) = get_with_headers(
-        &ctx,
-        "/v1/session",
-        &[(axum::http::header::COOKIE, cookie_hdr)],
-    )
-    .await?;
+    let (s_sess, body, _c) =
+        get_with_headers(&ctx, "/v1/session", &[(axum::http::header::COOKIE, cookie_hdr)]).await?;
     assert_eq!(s_sess, 401, "expected 401 after signout, got body={body}");
     Ok(())
 }

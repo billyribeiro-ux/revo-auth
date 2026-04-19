@@ -78,12 +78,7 @@ pub fn reg_take(flow_id: &str) -> Option<PasskeyRegistration> {
     Some(entry.state)
 }
 
-pub fn auth_put(
-    flow_id: &str,
-    state: PasskeyAuthentication,
-    user_id: Option<Uuid>,
-    ttl_secs: i64,
-) {
+pub fn auth_put(flow_id: &str, state: PasskeyAuthentication, user_id: Option<Uuid>, ttl_secs: i64) {
     reap_auth();
     let exp = chrono::Utc::now() + chrono::Duration::seconds(ttl_secs);
     AUTH_STORE.insert(flow_id.to_string(), AuthEntry { state, user_id, exp });

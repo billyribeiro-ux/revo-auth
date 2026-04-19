@@ -14,9 +14,7 @@ use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use webauthn_rs::prelude::{
-    PublicKeyCredential, RegisterPublicKeyCredential,
-};
+use webauthn_rs::prelude::{PublicKeyCredential, RegisterPublicKeyCredential};
 
 use crate::crypto::tokens::{random_token_32, token_b64url};
 use crate::db::{audit, passkeys, users};
@@ -25,9 +23,7 @@ use crate::middleware::auth::load_session_user;
 use crate::middleware::tenant::Tenant;
 use crate::routes::v1::session::{append_session_csrf_cookies, issue_session};
 use crate::state::AppState;
-use crate::webauthn::{
-    auth_put, auth_take, build_webauthn, reg_put, reg_take, rp_from_app,
-};
+use crate::webauthn::{auth_put, auth_take, build_webauthn, reg_put, reg_take, rp_from_app};
 
 const FLOW_TTL_SECS: i64 = 600;
 const REDIS_PREFIX_REG: &str = "webauthn:reg";
@@ -93,25 +89,20 @@ pub async fn register_begin(
     let webauthn = build_webauthn(&rp_id, &origin).map_err(|_| ApiError::Internal)?;
 
     // Exclude all existing credentials.
-    let existing = passkeys::list_for_user(&state.pool, user.id)
-        .await
-        .map_err(|_| ApiError::Internal)?;
+    let existing =
+        passkeys::list_for_user(&state.pool, user.id).await.map_err(|_| ApiError::Internal)?;
     let exclude: Vec<webauthn_rs::prelude::CredentialID> = existing
         .iter()
         .map(|p| webauthn_rs::prelude::CredentialID::from(p.credential_id.clone()))
         .collect();
     let exclude = if exclude.is_empty() { None } else { Some(exclude) };
 
-    let display = user
-        .name
-        .clone()
-        .or_else(|| user.email.clone())
-        .unwrap_or_else(|| user.id.to_string());
+    let display =
+        user.name.clone().or_else(|| user.email.clone()).unwrap_or_else(|| user.id.to_string());
     let name = user.email.clone().unwrap_or_else(|| user.id.to_string());
 
-    let (ccr, reg_state) = webauthn
-        .start_passkey_registration(user.id, &name, &display, exclude)
-        .map_err(|e| {
+    let (ccr, reg_state) =
+        webauthn.start_passkey_registration(user.id, &name, &display, exclude).map_err(|e| {
             tracing::warn!(error = ?e, "start_passkey_registration failed");
             ApiError::Internal
         })?;
@@ -120,11 +111,7 @@ pub async fn register_begin(
     reg_put(&flow_id, reg_state, FLOW_TTL_SECS);
     // Mirror the existence marker in Redis with TTL so ops can see active flows.
     let _ = state
-        .cache_set(
-            &format!("{REDIS_PREFIX_REG}:{}:{flow_id}", user.id),
-            "1",
-            FLOW_TTL_SECS as u64,
-        )
+        .cache_set(&format!("{REDIS_PREFIX_REG}:{}:{flow_id}", user.id), "1", FLOW_TTL_SECS as u64)
         .await;
 
     Ok((StatusCode::OK, Json(BeginResponse { flow_id, challenge: ccr })).into_response())
@@ -146,14 +133,12 @@ pub async fn register_finish(
     let (rp_id, origin) = rp_from_app(&app.origins).map_err(|_| ApiError::Internal)?;
     let webauthn = build_webauthn(&rp_id, &origin).map_err(|_| ApiError::Internal)?;
 
-    let reg_state = reg_take(&body.flow_id).ok_or(ApiError::BadRequest(
-        "passkey registration flow expired or unknown".into(),
-    ))?;
+    let reg_state = reg_take(&body.flow_id)
+        .ok_or(ApiError::BadRequest("passkey registration flow expired or unknown".into()))?;
     let _ = state.cache_del(&format!("{REDIS_PREFIX_REG}:{}:{}", user.id, body.flow_id)).await;
 
-    let passkey = webauthn
-        .finish_passkey_registration(&body.credential, &reg_state)
-        .map_err(|e| {
+    let passkey =
+        webauthn.finish_passkey_registration(&body.credential, &reg_state).map_err(|e| {
             tracing::warn!(error = ?e, "finish_passkey_registration failed");
             ApiError::BadRequest("passkey registration failed".into())
         })?;
@@ -209,16 +194,16 @@ pub async fn authenticate_begin(
     // Per webauthn-rs 0.5 (without the `resident-key-support` / discoverable
     // feature flag we'd need upstream), discoverable-credential flow is not
     // available on the stable Passkey API. Email is therefore required here.
-    let email = body.email.as_deref().ok_or(ApiError::BadRequest(
-        "email is required for passkey authentication".into(),
-    ))?;
+    let email = body
+        .email
+        .as_deref()
+        .ok_or(ApiError::BadRequest("email is required for passkey authentication".into()))?;
     let user = users::find_by_email(&state.pool, app.id, email)
         .await
         .map_err(|_| ApiError::Internal)?
         .ok_or(ApiError::NotFound)?;
-    let rows = passkeys::list_for_user(&state.pool, user.id)
-        .await
-        .map_err(|_| ApiError::Internal)?;
+    let rows =
+        passkeys::list_for_user(&state.pool, user.id).await.map_err(|_| ApiError::Internal)?;
     let mut keys = Vec::with_capacity(rows.len());
     for r in rows {
         let pk: webauthn_rs::prelude::Passkey =
@@ -228,9 +213,8 @@ pub async fn authenticate_begin(
     if keys.is_empty() {
         return Err(ApiError::NotFound);
     }
-    let (rcr, auth_state) = webauthn
-        .start_passkey_authentication(&keys)
-        .map_err(|_| ApiError::Internal)?;
+    let (rcr, auth_state) =
+        webauthn.start_passkey_authentication(&keys).map_err(|_| ApiError::Internal)?;
     let challenge_json = serde_json::to_value(rcr).map_err(|_| ApiError::Internal)?;
     let user_id = Some(user.id);
 
@@ -238,11 +222,7 @@ pub async fn authenticate_begin(
     auth_put(&flow_id, auth_state, user_id, FLOW_TTL_SECS);
     if let Some(uid) = user_id {
         let _ = state
-            .cache_set(
-                &format!("{REDIS_PREFIX_AUTH}:{uid}:{flow_id}"),
-                "1",
-                FLOW_TTL_SECS as u64,
-            )
+            .cache_set(&format!("{REDIS_PREFIX_AUTH}:{uid}:{flow_id}"), "1", FLOW_TTL_SECS as u64)
             .await;
     }
 
@@ -263,19 +243,17 @@ pub async fn authenticate_finish(
     let (rp_id, origin) = rp_from_app(&app.origins).map_err(|_| ApiError::Internal)?;
     let webauthn = build_webauthn(&rp_id, &origin).map_err(|_| ApiError::Internal)?;
 
-    let (auth_state, user_id) = auth_take(&body.flow_id).ok_or(ApiError::BadRequest(
-        "passkey authentication flow expired or unknown".into(),
-    ))?;
+    let (auth_state, user_id) = auth_take(&body.flow_id)
+        .ok_or(ApiError::BadRequest("passkey authentication flow expired or unknown".into()))?;
     if let Some(uid) = user_id {
         let _ = state.cache_del(&format!("{REDIS_PREFIX_AUTH}:{uid}:{}", body.flow_id)).await;
     }
 
-    let result = webauthn.finish_passkey_authentication(&body.credential, &auth_state).map_err(
-        |e| {
+    let result =
+        webauthn.finish_passkey_authentication(&body.credential, &auth_state).map_err(|e| {
             tracing::warn!(error = ?e, "finish_passkey_authentication failed");
             ApiError::InvalidCredentials
-        },
-    )?;
+        })?;
 
     let cred_id_bytes: Vec<u8> = result.cred_id().as_ref().to_vec();
     let row = passkeys::find_by_credential(&state.pool, &cred_id_bytes)
@@ -344,9 +322,8 @@ pub async fn list_passkeys(
     if user.app_id != app.id {
         return Err(ApiError::Forbidden);
     }
-    let rows = passkeys::list_for_user(&state.pool, user.id)
-        .await
-        .map_err(|_| ApiError::Internal)?;
+    let rows =
+        passkeys::list_for_user(&state.pool, user.id).await.map_err(|_| ApiError::Internal)?;
     let out: Vec<_> = rows
         .into_iter()
         .map(|r| PasskeyOut {

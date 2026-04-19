@@ -26,9 +26,7 @@ async fn authorize_redirects_with_pkce_params() -> anyhow::Result<()> {
         // by re-issuing the request and inspecting the Location header
         // bytes via the raw helper.
         use axum::http::{Method, Request};
-        let mut req = Request::builder()
-            .method(Method::GET)
-            .uri("/v1/oauth/google/authorize");
+        let mut req = Request::builder().method(Method::GET).uri("/v1/oauth/google/authorize");
         req = req
             .header("x-revo-app-id", ctx.app.id.to_string())
             .header("x-revo-app-public-key", ctx.public_key.clone());
@@ -40,17 +38,11 @@ async fn authorize_redirects_with_pkce_params() -> anyhow::Result<()> {
             .unwrap_or_default()
             .to_string();
         assert!(loc.contains("code_challenge="), "missing PKCE: {loc}");
-        assert!(
-            loc.contains("code_challenge_method=S256"),
-            "missing PKCE method: {loc}",
-        );
+        assert!(loc.contains("code_challenge_method=S256"), "missing PKCE method: {loc}",);
         assert!(loc.contains("state="), "missing state: {loc}");
     } else {
         // Scaffold path: tolerate 501/404 until handler is implemented.
-        assert!(
-            status == 501 || status == 404,
-            "unexpected authorize status: {status}",
-        );
+        assert!(status == 501 || status == 404, "unexpected authorize status: {status}",);
     }
     Ok(())
 }
@@ -104,9 +96,6 @@ async fn callback_with_tampered_state_is_rejected() -> anyhow::Result<()> {
     .await?;
     // Scaffold returns 501; production must reject with 400. Either proves
     // the route rejects — refine once the handler lands.
-    assert!(
-        status == 400 || status == 501,
-        "unexpected callback status: {status}",
-    );
+    assert!(status == 400 || status == 501, "unexpected callback status: {status}",);
     Ok(())
 }

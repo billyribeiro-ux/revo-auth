@@ -151,9 +151,7 @@ pub(crate) struct TokenResponse {
     pub expires_in: Option<i64>,
 }
 
-pub(crate) fn expires_at_from_in(
-    expires_in: Option<i64>,
-) -> Option<chrono::DateTime<chrono::Utc>> {
+pub(crate) fn expires_at_from_in(expires_in: Option<i64>) -> Option<chrono::DateTime<chrono::Utc>> {
     expires_in.map(|s| chrono::Utc::now() + chrono::Duration::seconds(s))
 }
 

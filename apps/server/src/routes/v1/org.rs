@@ -20,10 +20,7 @@ fn validate_slug(value: &str, _ctx: &()) -> garde::Result {
     if !(2..=40).contains(&len) {
         return Err(garde::Error::new("slug length must be 2..=40"));
     }
-    if !value
-        .chars()
-        .all(|c| matches!(c, 'a'..='z' | '0'..='9' | '-'))
-    {
+    if !value.chars().all(|c| matches!(c, 'a'..='z' | '0'..='9' | '-')) {
         return Err(garde::Error::new("slug must match [a-z0-9-]"));
     }
     Ok(())
@@ -57,9 +54,7 @@ pub async fn list_orgs(
     Extension(Tenant(app)): Extension<Tenant>,
     headers: HeaderMap,
 ) -> Result<Json<serde_json::Value>, ApiError> {
-    let (_sess, user) = load_session_user(&state, &headers)
-        .await?
-        .ok_or(ApiError::Unauthorized)?;
+    let (_sess, user) = load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
     if user.app_id != app.id {
         return Err(ApiError::Forbidden);
     }
@@ -70,13 +65,7 @@ pub async fn list_orgs(
         let role = memberships::role_of(&state.pool, r.id, user.id)
             .await
             .map_err(|_| ApiError::Internal)?;
-        out.push(OrgOut {
-            id: r.id,
-            slug: r.slug,
-            name: r.name,
-            role,
-            created_at: r.created_at,
-        });
+        out.push(OrgOut { id: r.id, slug: r.slug, name: r.name, role, created_at: r.created_at });
     }
     Ok(Json(serde_json::json!({ "orgs": out })))
 }
@@ -96,9 +85,7 @@ pub async fn create_org(
     Json(body): Json<CreateOrgBody>,
 ) -> Result<(StatusCode, Json<serde_json::Value>), ApiError> {
     body.validate().map_err(|e| ApiError::Validation(e.to_string()))?;
-    let (_sess, user) = load_session_user(&state, &headers)
-        .await?
-        .ok_or(ApiError::Unauthorized)?;
+    let (_sess, user) = load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
     if user.app_id != app.id {
         return Err(ApiError::Forbidden);
     }
@@ -155,9 +142,7 @@ pub async fn invite(
     Json(body): Json<InviteBody>,
 ) -> Result<StatusCode, ApiError> {
     body.validate().map_err(|e| ApiError::Validation(e.to_string()))?;
-    let (_sess, user) = load_session_user(&state, &headers)
-        .await?
-        .ok_or(ApiError::Unauthorized)?;
+    let (_sess, user) = load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
     if user.app_id != app.id {
         return Err(ApiError::Forbidden);
     }
@@ -246,9 +231,7 @@ pub async fn accept(
     Path(id): Path<Uuid>,
     Json(body): Json<AcceptBody>,
 ) -> Result<StatusCode, ApiError> {
-    let (_sess, user) = load_session_user(&state, &headers)
-        .await?
-        .ok_or(ApiError::Unauthorized)?;
+    let (_sess, user) = load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
     if user.app_id != app.id {
         return Err(ApiError::Forbidden);
     }

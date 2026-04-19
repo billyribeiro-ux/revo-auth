@@ -100,14 +100,11 @@ pub async fn setup(
         TokenCipher::from_master(&state.config.encryption_key).map_err(|_| ApiError::Internal)?;
     let enc = cipher.encrypt(&secret).map_err(|_| ApiError::Internal)?;
 
-    let account =
-        user.email.clone().unwrap_or_else(|| user.id.to_string());
+    let account = user.email.clone().unwrap_or_else(|| user.id.to_string());
     let totp = build_totp(&account, secret)?;
     let otpauth_url = totp.get_url();
 
-    totp::upsert_unconfirmed(&state.pool, user.id, &enc)
-        .await
-        .map_err(|_| ApiError::Internal)?;
+    totp::upsert_unconfirmed(&state.pool, user.id, &enc).await.map_err(|_| ApiError::Internal)?;
 
     let codes = gen_recovery_codes()?;
     let hashes: Vec<Vec<u8>> = codes.iter().map(|c| sha256(c.as_bytes())).collect();
@@ -194,9 +191,8 @@ pub async fn verify(
         .await
         .map_err(|_| ApiError::Internal)?
         .ok_or(ApiError::InvalidCredentials)?;
-    let confirmed_at = totp::get_confirmed_at(&state.pool, user.id)
-        .await
-        .map_err(|_| ApiError::Internal)?;
+    let confirmed_at =
+        totp::get_confirmed_at(&state.pool, user.id).await.map_err(|_| ApiError::Internal)?;
     if confirmed_at.is_none() {
         return Err(ApiError::BadRequest("totp is not configured".into()));
     }
@@ -224,8 +220,11 @@ pub async fn verify(
         }
         match hit {
             Some(i) => {
-                let remaining: Vec<Vec<u8>> =
-                    codes.iter().enumerate().filter_map(|(j, c)| if j == i { None } else { Some(c.clone()) }).collect();
+                let remaining: Vec<Vec<u8>> = codes
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(j, c)| if j == i { None } else { Some(c.clone()) })
+                    .collect();
                 totp::set_recovery_codes(&state.pool, user.id, &remaining)
                     .await
                     .map_err(|_| ApiError::Internal)?;

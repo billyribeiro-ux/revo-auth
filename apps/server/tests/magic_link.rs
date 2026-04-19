@@ -93,8 +93,7 @@ async fn magic_verify_redirects_with_session_cookie() -> anyhow::Result<()> {
         &json!({ "email": email, "password": "Sup3r-strong-p@ssw0rd!" }),
     )
     .await?;
-    let (s_req, _b, _c) =
-        post_json(&ctx, "/v1/magic/request", &json!({ "email": email })).await?;
+    let (s_req, _b, _c) = post_json(&ctx, "/v1/magic/request", &json!({ "email": email })).await?;
     if s_req == 501 {
         return Ok(());
     }
@@ -131,8 +130,7 @@ async fn magic_verify_rejects_reused_token() -> anyhow::Result<()> {
         &json!({ "email": email, "password": "Sup3r-strong-p@ssw0rd!" }),
     )
     .await?;
-    let (s_req, _b, _c) =
-        post_json(&ctx, "/v1/magic/request", &json!({ "email": email })).await?;
+    let (s_req, _b, _c) = post_json(&ctx, "/v1/magic/request", &json!({ "email": email })).await?;
     if s_req == 501 {
         return Ok(());
     }

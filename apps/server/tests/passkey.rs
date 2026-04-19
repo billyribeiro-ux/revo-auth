@@ -19,9 +19,7 @@ fn unique_email(label: &str) -> String {
     format!("{label}-{}@example.test", uuid::Uuid::now_v7().simple())
 }
 
-async fn signup_and_session(
-    ctx: &common::TestCtx,
-) -> anyhow::Result<(Vec<String>, String)> {
+async fn signup_and_session(ctx: &common::TestCtx) -> anyhow::Result<(Vec<String>, String)> {
     let (_s, _b, cookies) = post_json(
         ctx,
         "/v1/signup",
@@ -31,9 +29,8 @@ async fn signup_and_session(
         }),
     )
     .await?;
-    let csrf = cookie_value(&cookies, "__Host-revoauth.csrf")
-        .map(str::to_string)
-        .unwrap_or_default();
+    let csrf =
+        cookie_value(&cookies, "__Host-revoauth.csrf").map(str::to_string).unwrap_or_default();
     Ok((cookies, csrf))
 }
 
@@ -83,10 +80,7 @@ async fn register_begin_returns_challenge_shape() -> anyhow::Result<()> {
             "unexpected register/begin body: {body}",
         );
     } else {
-        assert_eq!(
-            status, 501,
-            "expected 501 from scaffold register/begin, got {status}",
-        );
+        assert_eq!(status, 501, "expected 501 from scaffold register/begin, got {status}",);
     }
     Ok(())
 }
@@ -105,10 +99,7 @@ async fn register_finish_rejects_malformed_credential() -> anyhow::Result<()> {
     )
     .await?;
     // 400 once implemented, 501 while scaffolded.
-    assert!(
-        matches!(status.as_u16(), 400 | 501),
-        "expected 400 or 501, got {status}",
-    );
+    assert!(matches!(status.as_u16(), 400 | 501), "expected 400 or 501, got {status}",);
     Ok(())
 }
 

@@ -60,7 +60,8 @@ pub async fn verify_request(
     .await
     .map_err(|_| ApiError::Internal)?;
 
-    let base = app.origins.first().cloned().unwrap_or_else(|| "https://example.invalid".to_string());
+    let base =
+        app.origins.first().cloned().unwrap_or_else(|| "https://example.invalid".to_string());
     let url = format!("{base}/verify-email?token={}", urlencoding::encode(&tok));
     crate::email::send_verification(state.mail.as_ref(), &state.config, &email, &url)
         .await

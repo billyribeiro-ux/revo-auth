@@ -70,36 +70,22 @@ async fn init_infra() -> Arc<SharedInfra> {
 
     let pg_host = pg.get_host().await.expect("pg host");
     let pg_port = pg.get_host_port_ipv4(5432).await.expect("pg port");
-    let db_url =
-        format!("postgres://postgres:postgres@{pg_host}:{pg_port}/revo_auth_test");
+    let db_url = format!("postgres://postgres:postgres@{pg_host}:{pg_port}/revo_auth_test");
     let pool = sqlx::postgres::PgPoolOptions::new()
         .max_connections(8)
         .connect(&db_url)
         .await
         .expect("testcontainers: pg connect");
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await
-        .expect("testcontainers: migrate");
+    sqlx::migrate!("./migrations").run(&pool).await.expect("testcontainers: migrate");
 
-    let redis = RedisImage::default()
-        .start()
-        .await
-        .expect("testcontainers: redis start");
+    let redis = RedisImage::default().start().await.expect("testcontainers: redis start");
     let r_host = redis.get_host().await.expect("redis host");
-    let r_port =
-        redis.get_host_port_ipv4(6379).await.expect("redis port");
+    let r_port = redis.get_host_port_ipv4(6379).await.expect("redis port");
     let redis_url = format!("redis://{r_host}:{r_port}");
-    let redis_pool = AppState::connect_redis(&redis_url)
-        .await
-        .expect("testcontainers: redis connect");
+    let redis_pool =
+        AppState::connect_redis(&redis_url).await.expect("testcontainers: redis connect");
 
-    Arc::new(SharedInfra {
-        pool,
-        redis: redis_pool,
-        _pg_container: pg,
-        _redis_container: redis,
-    })
+    Arc::new(SharedInfra { pool, redis: redis_pool, _pg_container: pg, _redis_container: redis })
 }
 
 async fn infra() -> Arc<SharedInfra> {
@@ -132,6 +118,15 @@ fn test_config(database_url: &str, redis_url: &str) -> Config {
         jwt_es256_private_pem: private_pem.into(),
         jwt_es256_public_pem: public_pem.into(),
         cookie_secure: true,
+        email_provider: "log".into(),
+        email_from: "Revo Auth <noreply@test.invalid>".into(),
+        smtp_host: None,
+        smtp_port: None,
+        smtp_username: None,
+        smtp_password: None,
+        smtp_starttls: true,
+        resend_api_key: None,
+        app_base_url: "https://test.localhost".into(),
     }
 }
 
@@ -140,9 +135,7 @@ fn test_config(database_url: &str, redis_url: &str) -> Config {
 pub async fn setup() -> TestCtx {
     let infra = infra().await;
     let (app, public_key, secret) =
-        setup_tenant(&infra.pool, &["https://test.localhost"])
-            .await
-            .expect("setup_tenant");
+        setup_tenant(&infra.pool, &["https://test.localhost"]).await.expect("setup_tenant");
 
     let cfg = test_config("inmem-unused", "inmem-unused");
     let state = AppState {
@@ -178,20 +171,9 @@ pub async fn setup_tenant(
     let name = "test app".to_string();
     let pk = format!("pk_test_{}", id.simple());
     let secret = format!("sk_test_{}", id.simple());
-    let secret_hash = hash_app_secret(&secret)
-        .map_err(|_| anyhow::anyhow!("hash app secret"))?;
-    let origins_owned: Vec<String> =
-        origins.iter().map(|o| (*o).to_string()).collect();
-    let row = apps::insert_app(
-        pool,
-        id,
-        &slug,
-        &name,
-        &origins_owned,
-        &pk,
-        &secret_hash,
-    )
-    .await?;
+    let secret_hash = hash_app_secret(&secret).map_err(|_| anyhow::anyhow!("hash app secret"))?;
+    let origins_owned: Vec<String> = origins.iter().map(|o| (*o).to_string()).collect();
+    let row = apps::insert_app(pool, id, &slug, &name, &origins_owned, &pk, &secret_hash).await?;
     Ok((row, pk, secret))
 }
 
@@ -249,10 +231,7 @@ pub async fn collect_bytes(
 }
 
 /// GET `path` with tenant headers attached.
-pub async fn get(
-    ctx: &TestCtx,
-    path: &str,
-) -> anyhow::Result<(StatusCode, Value, Vec<SetCookie>)> {
+pub async fn get(ctx: &TestCtx, path: &str) -> anyhow::Result<(StatusCode, Value, Vec<SetCookie>)> {
     let mut req = Request::builder().method(Method::GET).uri(path);
     for (k, v) in tenant_headers(ctx.app.id, &ctx.public_key) {
         req = req.header(k, v);
@@ -384,12 +363,7 @@ pub async fn get_as_tenant(
 /// Collapse a `Vec<SetCookie>` (header lines) into a single `Cookie:`
 /// request-header value by keeping only the `name=value` prefix of each.
 pub fn cookies_to_header(cookies: &[SetCookie]) -> String {
-    cookies
-        .iter()
-        .filter_map(|c| c.split(';').next())
-        .map(str::trim)
-        .collect::<Vec<_>>()
-        .join("; ")
+    cookies.iter().filter_map(|c| c.split(';').next()).map(str::trim).collect::<Vec<_>>().join("; ")
 }
 
 /// Pull a specific cookie's raw value by name from a Set-Cookie list.

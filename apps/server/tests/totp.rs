@@ -26,18 +26,14 @@ async fn signup(ctx: &TestCtx) -> anyhow::Result<(Vec<String>, String)> {
         }),
     )
     .await?;
-    let csrf = cookie_value(&cookies, "__Host-revoauth.csrf")
-        .map(str::to_string)
-        .unwrap_or_default();
+    let csrf =
+        cookie_value(&cookies, "__Host-revoauth.csrf").map(str::to_string).unwrap_or_default();
     Ok((cookies, csrf))
 }
 
 fn derive_code(otpauth_uri: &str) -> anyhow::Result<String> {
-    let totp = TOTP::from_url(otpauth_uri)
-        .map_err(|e| anyhow::anyhow!("totp url parse: {e}"))?;
-    let code = totp
-        .generate_current()
-        .map_err(|e| anyhow::anyhow!("totp code: {e}"))?;
+    let totp = TOTP::from_url(otpauth_uri).map_err(|e| anyhow::anyhow!("totp url parse: {e}"))?;
+    let code = totp.generate_current().map_err(|e| anyhow::anyhow!("totp code: {e}"))?;
     Ok(code)
 }
 
@@ -46,14 +42,8 @@ fn derive_code(otpauth_uri: &str) -> anyhow::Result<String> {
 async fn totp_setup_returns_uri_and_recovery_codes() -> anyhow::Result<()> {
     let ctx = setup().await;
     let (cookies, csrf) = signup(&ctx).await?;
-    let (status, body, _c) = post_json_with_session(
-        &ctx,
-        "/v1/totp/setup",
-        &json!({}),
-        &cookies,
-        Some(&csrf),
-    )
-    .await?;
+    let (status, body, _c) =
+        post_json_with_session(&ctx, "/v1/totp/setup", &json!({}), &cookies, Some(&csrf)).await?;
     if status == 501 {
         return Ok(()); // scaffold — skip body checks
     }
@@ -74,14 +64,8 @@ async fn totp_setup_returns_uri_and_recovery_codes() -> anyhow::Result<()> {
 async fn totp_confirm_with_valid_code_returns_204() -> anyhow::Result<()> {
     let ctx = setup().await;
     let (cookies, csrf) = signup(&ctx).await?;
-    let (status, body, _c) = post_json_with_session(
-        &ctx,
-        "/v1/totp/setup",
-        &json!({}),
-        &cookies,
-        Some(&csrf),
-    )
-    .await?;
+    let (status, body, _c) =
+        post_json_with_session(&ctx, "/v1/totp/setup", &json!({}), &cookies, Some(&csrf)).await?;
     if status == 501 {
         return Ok(());
     }
@@ -106,14 +90,8 @@ async fn totp_confirm_with_valid_code_returns_204() -> anyhow::Result<()> {
 async fn totp_verify_with_bad_code_returns_401() -> anyhow::Result<()> {
     let ctx = setup().await;
     let (cookies, csrf) = signup(&ctx).await?;
-    let (setup_status, _body, _c) = post_json_with_session(
-        &ctx,
-        "/v1/totp/setup",
-        &json!({}),
-        &cookies,
-        Some(&csrf),
-    )
-    .await?;
+    let (setup_status, _body, _c) =
+        post_json_with_session(&ctx, "/v1/totp/setup", &json!({}), &cookies, Some(&csrf)).await?;
     if setup_status == 501 {
         return Ok(());
     }
@@ -134,20 +112,12 @@ async fn totp_verify_with_bad_code_returns_401() -> anyhow::Result<()> {
 async fn totp_disable_with_valid_code_returns_204() -> anyhow::Result<()> {
     let ctx = setup().await;
     let (cookies, csrf) = signup(&ctx).await?;
-    let (setup_status, body, _c) = post_json_with_session(
-        &ctx,
-        "/v1/totp/setup",
-        &json!({}),
-        &cookies,
-        Some(&csrf),
-    )
-    .await?;
+    let (setup_status, body, _c) =
+        post_json_with_session(&ctx, "/v1/totp/setup", &json!({}), &cookies, Some(&csrf)).await?;
     if setup_status == 501 {
         return Ok(());
     }
-    let uri = body["otpauth_uri"]
-        .as_str()
-        .ok_or_else(|| anyhow::anyhow!("missing otpauth_uri"))?;
+    let uri = body["otpauth_uri"].as_str().ok_or_else(|| anyhow::anyhow!("missing otpauth_uri"))?;
     let code = derive_code(uri)?;
     // Confirm first so that disable is meaningful.
     let _ = post_json_with_session(

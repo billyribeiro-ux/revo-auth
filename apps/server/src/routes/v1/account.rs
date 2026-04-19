@@ -53,8 +53,7 @@ pub async fn link(
     headers: HeaderMap,
     Path(provider): Path<String>,
 ) -> Result<Json<LinkResponse>, ApiError> {
-    let (_sess, user) =
-        load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
+    let (_sess, user) = load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
     if user.app_id != app.id {
         return Err(ApiError::Forbidden);
     }
@@ -132,8 +131,7 @@ pub async fn unlink(
     headers: HeaderMap,
     Path(provider): Path<String>,
 ) -> Result<StatusCode, ApiError> {
-    let (_sess, user) =
-        load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
+    let (_sess, user) = load_session_user(&state, &headers).await?.ok_or(ApiError::Unauthorized)?;
     if user.app_id != app.id {
         return Err(ApiError::Forbidden);
     }
@@ -146,9 +144,8 @@ pub async fn unlink(
         .ok_or(ApiError::NotFound)?;
 
     // Require at least one other auth method.
-    let linked = accounts::count_for_user(&state.pool, user.id)
-        .await
-        .map_err(|_| ApiError::Internal)?;
+    let linked =
+        accounts::count_for_user(&state.pool, user.id).await.map_err(|_| ApiError::Internal)?;
     let has_password = user.password_hash.is_some();
     // `linked` includes this provider — so "other linked" = linked - 1.
     if !has_password && linked <= 1 {

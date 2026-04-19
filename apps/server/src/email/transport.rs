@@ -93,13 +93,14 @@ impl EmailTransport for SmtpTransport {
         use lettre::message::{header, MultiPart, SinglePart};
         use lettre::{AsyncTransport, Message};
 
-        let from: lettre::message::Mailbox =
-            self.from.parse().map_err(|e: lettre::address::AddressError| {
-                EmailError::Build(e.to_string())
-            })?;
-        let to: lettre::message::Mailbox = msg.to.parse().map_err(|e: lettre::address::AddressError| {
-            EmailError::Build(e.to_string())
-        })?;
+        let from: lettre::message::Mailbox = self
+            .from
+            .parse()
+            .map_err(|e: lettre::address::AddressError| EmailError::Build(e.to_string()))?;
+        let to: lettre::message::Mailbox = msg
+            .to
+            .parse()
+            .map_err(|e: lettre::address::AddressError| EmailError::Build(e.to_string()))?;
 
         let email = Message::builder()
             .from(from)
@@ -120,10 +121,7 @@ impl EmailTransport for SmtpTransport {
             )
             .map_err(|e| EmailError::Build(e.to_string()))?;
 
-        self.mailer
-            .send(email)
-            .await
-            .map_err(|e| EmailError::Smtp(e.to_string()))?;
+        self.mailer.send(email).await.map_err(|e| EmailError::Smtp(e.to_string()))?;
         Ok(())
     }
 }
@@ -140,7 +138,11 @@ pub struct ResendTransport {
 
 impl ResendTransport {
     pub fn new(api_key: &str, from: &str) -> Self {
-        Self { client: reqwest::Client::new(), api_key: api_key.to_string(), from: from.to_string() }
+        Self {
+            client: reqwest::Client::new(),
+            api_key: api_key.to_string(),
+            from: from.to_string(),
+        }
     }
 }
 

@@ -81,8 +81,9 @@ struct StateParts {
 fn verify_state(secret: &[u8], raw: &str) -> Result<StateParts, ApiError> {
     let (payload_b64, sig_b64) =
         raw.split_once('.').ok_or(ApiError::BadRequest("malformed state".into()))?;
-    let payload =
-        URL_SAFE_NO_PAD.decode(payload_b64).map_err(|_| ApiError::BadRequest("bad state".into()))?;
+    let payload = URL_SAFE_NO_PAD
+        .decode(payload_b64)
+        .map_err(|_| ApiError::BadRequest("bad state".into()))?;
     let sig =
         URL_SAFE_NO_PAD.decode(sig_b64).map_err(|_| ApiError::BadRequest("bad state".into()))?;
     let mut mac = HmacSha256::new_from_slice(secret).map_err(|_| ApiError::Internal)?;
@@ -151,24 +152,16 @@ pub async fn authorize(
 
     let nonce_bytes = random_token_32().map_err(|_| ApiError::Internal)?;
     let nonce = token_b64url(&nonce_bytes);
-    let redirect_after = q.redirect_after.unwrap_or_else(|| {
-        app.origins.first().cloned().unwrap_or_else(|| "/".to_string())
-    });
+    let redirect_after = q
+        .redirect_after
+        .unwrap_or_else(|| app.origins.first().cloned().unwrap_or_else(|| "/".to_string()));
     let exp_unix = (chrono::Utc::now() + Duration::seconds(STATE_TTL_SECS)).timestamp();
 
-    let state_str = build_state(
-        state.config.master_key.as_bytes(),
-        app.id,
-        &nonce,
-        &redirect_after,
-        exp_unix,
-    )?;
+    let state_str =
+        build_state(state.config.master_key.as_bytes(), app.id, &nonce, &redirect_after, exp_unix)?;
 
     let key = format!("revo:oauth:verifier:{}:{nonce}", p.id());
-    state
-        .cache_set(&key, &verifier, VERIFIER_TTL_SECS)
-        .await
-        .map_err(|_| ApiError::Internal)?;
+    state.cache_set(&key, &verifier, VERIFIER_TTL_SECS).await.map_err(|_| ApiError::Internal)?;
 
     let url = p.authorize_url(&creds, &state_str, &challenge);
     redirect_response(&url)
@@ -252,9 +245,7 @@ pub async fn callback(
     // Encrypt the access + refresh tokens at rest.
     let cipher =
         TokenCipher::from_master(&state.config.encryption_key).map_err(|_| ApiError::Internal)?;
-    let at_enc = cipher
-        .encrypt(profile.access_token.as_bytes())
-        .map_err(|_| ApiError::Internal)?;
+    let at_enc = cipher.encrypt(profile.access_token.as_bytes()).map_err(|_| ApiError::Internal)?;
     let rt_enc = match profile.refresh_token.as_deref() {
         Some(rt) => Some(cipher.encrypt(rt.as_bytes()).map_err(|_| ApiError::Internal)?),
         None => None,

@@ -66,7 +66,8 @@ pub async fn request(
             .await
             .map_err(|_| ApiError::Internal)?;
 
-        let base = app.origins.first().cloned().unwrap_or_else(|| "https://example.invalid".to_string());
+        let base =
+            app.origins.first().cloned().unwrap_or_else(|| "https://example.invalid".to_string());
         let redirect = body.redirect_after.as_deref().unwrap_or("");
         let url = format!(
             "{base}/v1/magic/verify?token={}&redirect_after={}",

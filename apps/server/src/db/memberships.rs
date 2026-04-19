@@ -47,12 +47,11 @@ pub async fn role_of(
     org_id: Uuid,
     user_id: Uuid,
 ) -> Result<Option<String>, sqlx::Error> {
-    let row: Option<(String,)> = sqlx::query_as(
-        r#"select role from memberships where org_id = $1 and user_id = $2"#,
-    )
-    .bind(org_id)
-    .bind(user_id)
-    .fetch_optional(pool)
-    .await?;
+    let row: Option<(String,)> =
+        sqlx::query_as(r#"select role from memberships where org_id = $1 and user_id = $2"#)
+            .bind(org_id)
+            .bind(user_id)
+            .fetch_optional(pool)
+            .await?;
     Ok(row.map(|r| r.0))
 }

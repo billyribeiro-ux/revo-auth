@@ -7,16 +7,13 @@ mod common;
 use serde_json::json;
 use serial_test::serial;
 
-use crate::common::{
-    cookies_to_header, get_as_tenant, post_json_as_tenant, setup, setup_tenant,
-};
+use crate::common::{cookies_to_header, get_as_tenant, post_json_as_tenant, setup, setup_tenant};
 
 #[tokio::test]
 #[serial]
 async fn same_email_across_apps_is_allowed() -> anyhow::Result<()> {
     let ctx = setup().await;
-    let (app_b, pk_b, _secret_b) =
-        setup_tenant(&ctx.pool, &["https://app-b.localhost"]).await?;
+    let (app_b, pk_b, _secret_b) = setup_tenant(&ctx.pool, &["https://app-b.localhost"]).await?;
     let email = format!("shared-{}@example.test", uuid::Uuid::now_v7().simple());
 
     let (sa, body_a, _c) = post_json_as_tenant(
@@ -45,8 +42,7 @@ async fn same_email_across_apps_is_allowed() -> anyhow::Result<()> {
 #[serial]
 async fn signin_is_scoped_to_originating_app() -> anyhow::Result<()> {
     let ctx = setup().await;
-    let (app_b, pk_b, _secret_b) =
-        setup_tenant(&ctx.pool, &["https://app-b.localhost"]).await?;
+    let (app_b, pk_b, _secret_b) = setup_tenant(&ctx.pool, &["https://app-b.localhost"]).await?;
     let email = format!("scoped-{}@example.test", uuid::Uuid::now_v7().simple());
     let pw_a = "Sup3r-strong-p@ssw0rd!";
 
@@ -88,8 +84,7 @@ async fn signin_is_scoped_to_originating_app() -> anyhow::Result<()> {
 #[serial]
 async fn session_is_rejected_when_presented_to_other_app() -> anyhow::Result<()> {
     let ctx = setup().await;
-    let (app_b, pk_b, _secret_b) =
-        setup_tenant(&ctx.pool, &["https://app-b.localhost"]).await?;
+    let (app_b, pk_b, _secret_b) = setup_tenant(&ctx.pool, &["https://app-b.localhost"]).await?;
     let email = format!("xapp-{}@example.test", uuid::Uuid::now_v7().simple());
 
     let (_s, _b, cookies) = post_json_as_tenant(
