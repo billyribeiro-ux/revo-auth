@@ -7,22 +7,22 @@
 
 	const token = $derived(page.url.searchParams.get('token') ?? '');
 
-	let state: State = $state('idle');
+	let status: State = $state('idle');
 	let message = $state('');
 
 	async function confirm() {
 		if (token === '') {
-			state = 'error';
+			status = 'error';
 			message = 'Missing token in URL.';
 			return;
 		}
-		state = 'pending';
+		status = 'pending';
 		const result = await authClient().emailVerifyConfirm({ token });
 		if (result.ok) {
-			state = 'success';
+			status = 'success';
 			message = 'Email verified. You can close this tab or return to the app.';
 		} else {
-			state = 'error';
+			status = 'error';
 			message = result.error.message;
 		}
 	}
@@ -30,7 +30,7 @@
 	$effect(() => {
 		if (token !== '') {
 			untrack(() => {
-				if (state === 'idle') void confirm();
+				if (status === 'idle') void confirm();
 			});
 		}
 	});
@@ -38,12 +38,12 @@
 
 <section class="panel">
 	<h1>Verify email</h1>
-	{#if state === 'pending'}
+	{#if status === 'pending'}
 		<p aria-busy="true">Verifying…</p>
-	{:else if state === 'success'}
+	{:else if status === 'success'}
 		<p class="success">{message}</p>
 		<a class="btn" href="/dashboard">Continue to dashboard</a>
-	{:else if state === 'error'}
+	{:else if status === 'error'}
 		<p class="error">{message}</p>
 		<button type="button" class="btn" onclick={confirm}>Try again</button>
 	{:else}

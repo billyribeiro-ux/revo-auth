@@ -1,19 +1,18 @@
-import { env } from '$env/dynamic/private';
+import { env } from '$env/dynamic/public';
 import type { RevoAuthConfig } from '@revo-auth/sdk-core';
 
 /**
- * Revo-Auth configuration shared between server hook and client factories.
- * User-owned: the CLI will only merge new keys with defaults; values stay put.
+ * Public Revo-Auth config (safe to ship to the browser). Uses `PUBLIC_`
+ * prefixed env vars per SvelteKit's public-env contract.
+ *
+ * User-owned file: the CLI will only merge new keys with defaults; values
+ * stay put on subsequent `revo-auth update` runs.
  */
-export const authConfig = {
-	serverUrl: env.REVO_AUTH_SERVER_URL ?? 'http://localhost:8787',
-	appId: env.REVO_AUTH_APP_ID ?? 'demo-app',
-	publicKey: env.REVO_AUTH_PUBLIC_KEY ?? 'pk_demo_replace_me'
+export const publicAuthConfig = {
+	serverUrl: env.PUBLIC_REVO_AUTH_SERVER_URL ?? 'http://localhost:8787',
+	appId: env.PUBLIC_REVO_AUTH_APP_ID ?? 'demo-app',
+	publicKey: env.PUBLIC_REVO_AUTH_PUBLIC_KEY ?? 'pk_demo_replace_me'
 } satisfies RevoAuthConfig;
 
-/** Public config (safe to ship to the browser). */
-export const publicAuthConfig = {
-	serverUrl: authConfig.serverUrl,
-	appId: authConfig.appId,
-	publicKey: authConfig.publicKey
-} satisfies RevoAuthConfig;
+/** Alias for server-side code that only needs the public subset. */
+export const authConfig = publicAuthConfig;

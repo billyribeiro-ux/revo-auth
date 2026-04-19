@@ -4,39 +4,39 @@
 	import { goto } from '$app/navigation';
 
 	type Phase = 'request' | 'confirm';
-	type State = 'idle' | 'pending' | 'success' | 'error';
+	type Status = 'idle' | 'pending' | 'success' | 'error';
 
 	const token = $derived(page.url.searchParams.get('token') ?? '');
 	const phase: Phase = $derived(token === '' ? 'request' : 'confirm');
 
 	let email = $state('');
 	let password = $state('');
-	let state: State = $state('idle');
+	let status: Status = $state('idle');
 	let message = $state('');
 
 	async function handleRequest(event: SubmitEvent) {
 		event.preventDefault();
-		state = 'pending';
+		status = 'pending';
 		const result = await authClient().passwordResetRequest({ email });
 		if (result.ok) {
-			state = 'success';
+			status = 'success';
 			message = 'If an account exists, a reset link has been emailed.';
 		} else {
-			state = 'error';
+			status = 'error';
 			message = result.error.message;
 		}
 	}
 
 	async function handleConfirm(event: SubmitEvent) {
 		event.preventDefault();
-		state = 'pending';
+		status = 'pending';
 		const result = await authClient().passwordResetConfirm({ token, password });
 		if (result.ok) {
-			state = 'success';
+			status = 'success';
 			message = 'Password updated. Redirecting to sign-in…';
 			setTimeout(() => void goto('/login'), 750);
 		} else {
-			state = 'error';
+			status = 'error';
 			message = result.error.message;
 		}
 	}
@@ -54,11 +54,11 @@
 					required
 					autocomplete="email"
 					bind:value={email}
-					disabled={state === 'pending'}
+					disabled={status === 'pending'}
 				/>
 			</label>
-			<button type="submit" class="btn primary" disabled={state === 'pending'}>
-				{state === 'pending' ? 'Sending…' : 'Send reset link'}
+			<button type="submit" class="btn primary" disabled={status === 'pending'}>
+				{status === 'pending' ? 'Sending…' : 'Send reset link'}
 			</button>
 		</form>
 	{:else}
@@ -71,18 +71,18 @@
 					required
 					autocomplete="new-password"
 					bind:value={password}
-					disabled={state === 'pending'}
+					disabled={status === 'pending'}
 				/>
 			</label>
-			<button type="submit" class="btn primary" disabled={state === 'pending'}>
-				{state === 'pending' ? 'Updating…' : 'Set new password'}
+			<button type="submit" class="btn primary" disabled={status === 'pending'}>
+				{status === 'pending' ? 'Updating…' : 'Set new password'}
 			</button>
 		</form>
 	{/if}
 
-	{#if state === 'success'}
+	{#if status === 'success'}
 		<p class="success" role="status">{message}</p>
-	{:else if state === 'error'}
+	{:else if status === 'error'}
 		<p class="error" role="alert">{message}</p>
 	{/if}
 </section>
