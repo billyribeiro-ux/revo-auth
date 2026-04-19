@@ -24,7 +24,7 @@ export interface FormController<T extends Record<string, unknown>> {
  * the given zod schema, and invokes `onSubmit` on success.
  */
 export function createForm<T extends Record<string, unknown>>(
-	options: CreateFormOptions<T>
+	options: CreateFormOptions<T>,
 ): FormController<T> {
 	const { schema, initial, onSubmit } = options;
 
@@ -102,6 +102,6 @@ export function createForm<T extends Record<string, unknown>>(
 		submit,
 		setError,
 		reset,
-		attach
+		attach,
 	};
 }

@@ -1,28 +1,28 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import { createForm } from '../lib/form.svelte';
-	import { magicRequestSchema } from '../lib/validation';
+import type { Snippet } from 'svelte';
+import { createForm } from '../form.svelte';
+import { magicRequestSchema } from '../validation';
 
-	interface Props {
-		onSubmit: (values: { email: string }) => Promise<void>;
-		header?: Snippet;
-		success?: Snippet<[{ email: string }]>;
-	}
+interface Props {
+	onSubmit: (values: { email: string }) => Promise<void>;
+	header?: Snippet;
+	success?: Snippet<[{ email: string }]>;
+}
 
-	let { onSubmit, header, success }: Props = $props();
+const { onSubmit, header, success }: Props = $props();
 
-	let sent = $state(false);
-	let sentEmail = $state('');
+let sent = $state(false);
+let sentEmail = $state('');
 
-	const form = createForm({
-		schema: magicRequestSchema,
-		initial: { email: '' },
-		onSubmit: async (values) => {
-			await onSubmit(values);
-			sentEmail = values.email;
-			sent = true;
-		}
-	});
+const form = createForm({
+	schema: magicRequestSchema,
+	initial: { email: '' },
+	onSubmit: async (values) => {
+		await onSubmit(values);
+		sentEmail = values.email;
+		sent = true;
+	},
+});
 </script>
 
 <div class="magic">

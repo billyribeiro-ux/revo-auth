@@ -1,38 +1,45 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import { createForm } from '../lib/form.svelte';
-	import { signupSchema } from '../lib/validation';
-	import PasswordField from './PasswordField.svelte';
-	import PasswordStrengthMeter from './PasswordStrengthMeter.svelte';
+import type { Snippet } from 'svelte';
+import { createForm } from '../form.svelte';
+import { signupSchema } from '../validation';
+import PasswordField from './PasswordField.svelte';
+import PasswordStrengthMeter from './PasswordStrengthMeter.svelte';
 
-	interface Props {
-		onSubmit: (values: {
-			name?: string;
-			email: string;
-			password: string;
-			terms: true;
-		}) => Promise<void>;
-		termsHref?: string;
-		privacyHref?: string;
-		showName?: boolean;
-		header?: Snippet;
-		footer?: Snippet;
-	}
+interface SignupValues {
+	name?: string | undefined;
+	email: string;
+	password: string;
+	terms: true;
+}
 
-	let {
-		onSubmit,
-		termsHref = '/terms',
-		privacyHref = '/privacy',
-		showName = true,
-		header,
-		footer
-	}: Props = $props();
+interface Props {
+	onSubmit: (values: SignupValues) => Promise<void>;
+	termsHref?: string;
+	privacyHref?: string;
+	showName?: boolean;
+	header?: Snippet;
+	footer?: Snippet;
+}
 
-	const form = createForm({
-		schema: signupSchema,
-		initial: { name: '', email: '', password: '', terms: false as unknown as true },
-		onSubmit: (values) => onSubmit(values)
-	});
+const {
+	onSubmit,
+	termsHref = '/terms',
+	privacyHref = '/privacy',
+	showName = true,
+	header,
+	footer,
+}: Props = $props();
+
+const form = createForm({
+	schema: signupSchema,
+	initial: {
+		name: '',
+		email: '',
+		password: '',
+		terms: false as unknown as true,
+	},
+	onSubmit: (values) => onSubmit(values),
+});
 </script>
 
 <form {@attach form.attach} novalidate>

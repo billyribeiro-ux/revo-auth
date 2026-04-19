@@ -1,35 +1,35 @@
 <script lang="ts">
-	type Provider = 'google' | 'github' | 'microsoft' | 'discord' | 'apple';
+type Provider = 'google' | 'github' | 'microsoft' | 'discord' | 'apple';
 
-	interface Props {
-		provider: Provider;
-		onClick?: (provider: Provider) => void | Promise<void>;
-		disabled?: boolean;
+interface Props {
+	provider: Provider;
+	onClick?: (provider: Provider) => void | Promise<void>;
+	disabled?: boolean;
+}
+
+const { provider, onClick, disabled = false }: Props = $props();
+
+const labels: Readonly<Record<Provider, string>> = {
+	google: 'Google',
+	github: 'GitHub',
+	microsoft: 'Microsoft',
+	discord: 'Discord',
+	apple: 'Apple',
+};
+
+const label = $derived(labels[provider]);
+
+let busy = $state(false);
+
+async function handleClick(): Promise<void> {
+	if (!onClick || busy || disabled) return;
+	busy = true;
+	try {
+		await onClick(provider);
+	} finally {
+		busy = false;
 	}
-
-	let { provider, onClick, disabled = false }: Props = $props();
-
-	const labels: Readonly<Record<Provider, string>> = {
-		google: 'Google',
-		github: 'GitHub',
-		microsoft: 'Microsoft',
-		discord: 'Discord',
-		apple: 'Apple'
-	};
-
-	const label = $derived(labels[provider]);
-
-	let busy = $state(false);
-
-	async function handleClick(): Promise<void> {
-		if (!onClick || busy || disabled) return;
-		busy = true;
-		try {
-			await onClick(provider);
-		} finally {
-			busy = false;
-		}
-	}
+}
 </script>
 
 <button

@@ -1,29 +1,29 @@
 <script lang="ts">
-	type Mode = 'register' | 'authenticate';
+type Mode = 'register' | 'authenticate';
 
-	interface Props {
-		mode: Mode;
-		onClick?: () => void | Promise<void>;
-		disabled?: boolean;
+interface Props {
+	mode: Mode;
+	onClick?: () => void | Promise<void>;
+	disabled?: boolean;
+}
+
+const { mode, onClick, disabled = false }: Props = $props();
+
+const label = $derived(
+	mode === 'register' ? 'Create a passkey' : 'Sign in with passkey',
+);
+
+let busy = $state(false);
+
+async function handleClick(): Promise<void> {
+	if (!onClick || busy || disabled) return;
+	busy = true;
+	try {
+		await onClick();
+	} finally {
+		busy = false;
 	}
-
-	let { mode, onClick, disabled = false }: Props = $props();
-
-	const label = $derived(
-		mode === 'register' ? 'Create a passkey' : 'Sign in with passkey'
-	);
-
-	let busy = $state(false);
-
-	async function handleClick(): Promise<void> {
-		if (!onClick || busy || disabled) return;
-		busy = true;
-		try {
-			await onClick();
-		} finally {
-			busy = false;
-		}
-	}
+}
 </script>
 
 <button

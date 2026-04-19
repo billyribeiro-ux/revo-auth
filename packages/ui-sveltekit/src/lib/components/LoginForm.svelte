@@ -1,32 +1,26 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import { createForm } from '../lib/form.svelte';
-	import { loginSchema } from '../lib/validation';
-	import PasswordField from './PasswordField.svelte';
-	import OAuthButton from './OAuthButton.svelte';
+import type { Snippet } from 'svelte';
+import { createForm } from '../form.svelte';
+import { loginSchema } from '../validation';
+import OAuthButton from './OAuthButton.svelte';
+import PasswordField from './PasswordField.svelte';
 
-	type OAuthProvider = 'google' | 'github' | 'microsoft' | 'discord' | 'apple';
+type OAuthProvider = 'google' | 'github' | 'microsoft' | 'discord' | 'apple';
 
-	interface Props {
-		providers?: readonly OAuthProvider[];
-		onSubmit: (values: { email: string; password: string }) => Promise<void>;
-		onOAuth?: (provider: OAuthProvider) => void | Promise<void>;
-		header?: Snippet;
-		footer?: Snippet;
-	}
-	let {
-		providers = [],
-		onSubmit,
-		onOAuth,
-		header,
-		footer
-	}: Props = $props();
+interface Props {
+	providers?: readonly OAuthProvider[];
+	onSubmit: (values: { email: string; password: string }) => Promise<void>;
+	onOAuth?: (provider: OAuthProvider) => void | Promise<void>;
+	header?: Snippet;
+	footer?: Snippet;
+}
+const { providers = [], onSubmit, onOAuth, header, footer }: Props = $props();
 
-	const form = createForm({
-		schema: loginSchema,
-		initial: { email: '', password: '' },
-		onSubmit: (values) => onSubmit(values)
-	});
+const form = createForm({
+	schema: loginSchema,
+	initial: { email: '', password: '' },
+	onSubmit: (values) => onSubmit(values),
+});
 </script>
 
 <form {@attach form.attach} novalidate>
@@ -35,7 +29,11 @@
 	{#if providers.length > 0}
 		<div class="oauth-grid">
 			{#each providers as provider (provider)}
-				<OAuthButton {provider} onClick={onOAuth} />
+				{#if onOAuth}
+					<OAuthButton {provider} onClick={onOAuth} />
+				{:else}
+					<OAuthButton {provider} />
+				{/if}
 			{/each}
 		</div>
 		<div class="divider" role="separator">or</div>

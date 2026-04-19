@@ -42,9 +42,8 @@
 		font-size: var(--type-base);
 		font-weight: 500;
 		cursor: pointer;
-		transition:
-			background var(--motion-fast) var(--motion-ease),
-			border-color var(--motion-fast) var(--motion-ease);
+		transition: background var(--motion-fast) var(--motion-ease), border-color
+			var(--motion-fast) var(--motion-ease);
 
 		&:hover:not(:disabled) {
 			background: var(--surface-sunken);

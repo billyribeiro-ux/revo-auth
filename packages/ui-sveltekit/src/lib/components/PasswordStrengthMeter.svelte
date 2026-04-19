@@ -1,36 +1,36 @@
 <script lang="ts">
-	interface Props {
-		password: string;
-	}
+interface Props {
+	password: string;
+}
 
-	let { password }: Props = $props();
+const { password }: Props = $props();
 
-	function scorePassword(pw: string): number {
-		if (!pw) return 0;
-		let score = 0;
-		const length = pw.length;
-		if (length >= 8) score += 1;
-		if (length >= 12) score += 1;
+function scorePassword(pw: string): number {
+	if (!pw) return 0;
+	let score = 0;
+	const length = pw.length;
+	if (length >= 8) score += 1;
+	if (length >= 12) score += 1;
 
-		const hasLower = /[a-z]/.test(pw);
-		const hasUpper = /[A-Z]/.test(pw);
-		const hasDigit = /\d/.test(pw);
-		const hasSymbol = /[^A-Za-z0-9]/.test(pw);
-		const variety =
-			Number(hasLower) + Number(hasUpper) + Number(hasDigit) + Number(hasSymbol);
+	const hasLower = /[a-z]/.test(pw);
+	const hasUpper = /[A-Z]/.test(pw);
+	const hasDigit = /\d/.test(pw);
+	const hasSymbol = /[^A-Za-z0-9]/.test(pw);
+	const variety =
+		Number(hasLower) + Number(hasUpper) + Number(hasDigit) + Number(hasSymbol);
 
-		if (variety >= 2) score += 1;
-		if (variety >= 3 && length >= 10) score += 1;
+	if (variety >= 2) score += 1;
+	if (variety >= 3 && length >= 10) score += 1;
 
-		if (/(.)\1{2,}/.test(pw)) score -= 1;
-		if (length < 6) score = 0;
+	if (/(.)\1{2,}/.test(pw)) score -= 1;
+	if (length < 6) score = 0;
 
-		return Math.max(0, Math.min(4, score));
-	}
+	return Math.max(0, Math.min(4, score));
+}
 
-	const score = $derived(scorePassword(password));
-	const labels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'] as const;
-	const label = $derived(labels[score] ?? 'Too short');
+const score = $derived(scorePassword(password));
+const labels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'] as const;
+const label = $derived(labels[score] ?? 'Too short');
 </script>
 
 <div class="meter" role="group" aria-label="Password strength">

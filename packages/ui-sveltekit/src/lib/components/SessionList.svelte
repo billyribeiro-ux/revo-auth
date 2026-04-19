@@ -1,45 +1,45 @@
 <script lang="ts">
-	export interface SessionRow {
-		id: string;
-		userAgent: string;
-		ip: string;
-		createdAt: string | Date;
-		lastUsedAt: string | Date;
-		current?: boolean;
+export interface SessionRow {
+	id: string;
+	userAgent: string;
+	ip: string;
+	createdAt: string | Date;
+	lastUsedAt: string | Date;
+	current?: boolean;
+}
+
+interface Props {
+	sessions: readonly SessionRow[];
+	currentId: string;
+	onRevoke: (id: string) => Promise<void>;
+}
+
+const { sessions, currentId, onRevoke }: Props = $props();
+
+const pendingIds = $state<Set<string>>(new Set());
+
+function toDate(value: string | Date): Date {
+	return value instanceof Date ? value : new Date(value);
+}
+
+const dateFmt = new Intl.DateTimeFormat(undefined, {
+	dateStyle: 'medium',
+	timeStyle: 'short',
+});
+
+function formatDate(value: string | Date): string {
+	return dateFmt.format(toDate(value));
+}
+
+async function revoke(id: string): Promise<void> {
+	if (pendingIds.has(id)) return;
+	pendingIds.add(id);
+	try {
+		await onRevoke(id);
+	} finally {
+		pendingIds.delete(id);
 	}
-
-	interface Props {
-		sessions: readonly SessionRow[];
-		currentId: string;
-		onRevoke: (id: string) => Promise<void>;
-	}
-
-	let { sessions, currentId, onRevoke }: Props = $props();
-
-	const pendingIds = $state<Set<string>>(new Set());
-
-	function toDate(value: string | Date): Date {
-		return value instanceof Date ? value : new Date(value);
-	}
-
-	const dateFmt = new Intl.DateTimeFormat(undefined, {
-		dateStyle: 'medium',
-		timeStyle: 'short'
-	});
-
-	function formatDate(value: string | Date): string {
-		return dateFmt.format(toDate(value));
-	}
-
-	async function revoke(id: string): Promise<void> {
-		if (pendingIds.has(id)) return;
-		pendingIds.add(id);
-		try {
-			await onRevoke(id);
-		} finally {
-			pendingIds.delete(id);
-		}
-	}
+}
 </script>
 
 <section class="sessions" aria-label="Active sessions">

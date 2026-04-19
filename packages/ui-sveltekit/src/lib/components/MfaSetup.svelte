@@ -1,45 +1,45 @@
 <script lang="ts">
-	import MfaChallenge from './MfaChallenge.svelte';
+import MfaChallenge from './MfaChallenge.svelte';
 
-	interface Props {
-		qrUri: string;
-		secret: string;
-		recoveryCodes: readonly string[];
-		onConfirm: (code: string) => Promise<void>;
-		issuer?: string;
-	}
+interface Props {
+	qrUri: string;
+	secret: string;
+	recoveryCodes: readonly string[];
+	onConfirm: (code: string) => Promise<void>;
+	issuer?: string;
+}
 
-	let {
-		qrUri,
-		secret,
-		recoveryCodes,
-		onConfirm,
-		issuer = 'Revo Auth'
-	}: Props = $props();
+const {
+	qrUri,
+	secret,
+	recoveryCodes,
+	onConfirm,
+	issuer = 'Revo Auth',
+}: Props = $props();
 
-	let secretVisible = $state(false);
-	let copied = $state(false);
+let secretVisible = $state(false);
+let copied = $state(false);
 
-	function toggleSecret(): void {
-		secretVisible = !secretVisible;
-	}
+function toggleSecret(): void {
+	secretVisible = !secretVisible;
+}
 
-	async function copyCodes(): Promise<void> {
-		const text = recoveryCodes.join('\n');
-		try {
-			await navigator.clipboard.writeText(text);
-			copied = true;
-			setTimeout(() => {
-				copied = false;
-			}, 2000);
-		} catch {
+async function copyCodes(): Promise<void> {
+	const text = recoveryCodes.join('\n');
+	try {
+		await navigator.clipboard.writeText(text);
+		copied = true;
+		setTimeout(() => {
 			copied = false;
-		}
+		}, 2000);
+	} catch {
+		copied = false;
 	}
+}
 
-	const maskedSecret = $derived(
-		secretVisible ? secret : secret.replace(/./g, '•')
-	);
+const maskedSecret = $derived(
+	secretVisible ? secret : secret.replace(/./g, '•'),
+);
 </script>
 
 <section class="mfa" aria-label={`Set up two-factor authentication for ${issuer}`}>

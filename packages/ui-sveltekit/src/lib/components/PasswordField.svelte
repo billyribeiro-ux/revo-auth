@@ -1,34 +1,35 @@
 <script lang="ts">
-	interface Props {
-		value: string;
-		error?: string | undefined;
-		label?: string;
-		id?: string;
-		name?: string;
-		autocomplete?: 'current-password' | 'new-password' | 'off';
-		required?: boolean;
-		placeholder?: string;
-	}
+interface Props {
+	value: string;
+	error?: string | undefined;
+	label?: string;
+	id?: string;
+	name?: string;
+	autocomplete?: 'current-password' | 'new-password' | 'off';
+	required?: boolean;
+	placeholder?: string;
+}
 
-	let {
-		value = $bindable(''),
-		error = undefined,
-		label = 'Password',
-		id = 'password',
-		name = 'password',
-		autocomplete = 'current-password',
-		required = true,
-		placeholder = ''
-	}: Props = $props();
+// biome-ignore lint/style/useConst: $bindable prop must be `let` for two-way binding
+let {
+	value = $bindable(''),
+	error = undefined,
+	label = 'Password',
+	id = 'password',
+	name = 'password',
+	autocomplete = 'current-password',
+	required = true,
+	placeholder = '',
+}: Props = $props();
 
-	let visible = $state(false);
+let visible = $state(false);
 
-	const errorId = $derived(`${id}-err`);
-	const type = $derived(visible ? 'text' : 'password');
+const errorId = $derived(`${id}-err`);
+const type = $derived(visible ? 'text' : 'password');
 
-	function toggleVisible(): void {
-		visible = !visible;
-	}
+function toggleVisible(): void {
+	visible = !visible;
+}
 </script>
 
 <label class="field" for={id}>
