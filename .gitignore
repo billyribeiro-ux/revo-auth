@@ -1,14 +1,70 @@
-node_modules
-dist
-.turbo
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.output/
+.svelte-kit/
+.astro/
+.turbo/
+.vercel/
+.next/
+out/
+
+# Rust
+target/
+Cargo.lock.bak
+
+# sqlx offline cache
+.sqlx/
+
+# OS
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.example.json
+*.swp
+*.swo
+*~
+
+# Env / secrets
 .env
 .env.*
 !.env.example
-target
-.sqlx
-.docs-cache
-.revo-auth
-playwright-report
-test-results
-.astro
+*.pem
+!apps/docs/**/*.pem
+!**/fixtures/**/*.pem
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test output
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+.playwright/
+junit.xml
+
+# CLI scratch
+.revo-auth/
+.docs-cache/
+
+# Temp
+tmp/
+.tmp/
+*.tsbuildinfo
+
+# Pagefind
+pagefind/
