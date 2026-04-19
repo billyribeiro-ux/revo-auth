@@ -8,7 +8,9 @@ interface PromptOption<T> {
 	hint?: string | undefined;
 }
 
-function toClackOptions<T>(options: PromptOption<T>[]): { value: T; label: string; hint?: string }[] {
+function toClackOptions<T>(
+	options: PromptOption<T>[],
+): { value: T; label: string; hint?: string }[] {
 	return options.map((o) => {
 		const base: { value: T; label: string; hint?: string } = {
 			value: o.value,
@@ -74,9 +76,10 @@ export async function askSelect<T extends string>(
 	initialValue?: T,
 ): Promise<T> {
 	const clackOptions = toClackOptions(options) as SelectOptions<T>['options'];
-	const opts: SelectOptions<T> = initialValue !== undefined
-		? { message, options: clackOptions, initialValue }
-		: { message, options: clackOptions };
+	const opts: SelectOptions<T> =
+		initialValue !== undefined
+			? { message, options: clackOptions, initialValue }
+			: { message, options: clackOptions };
 	const result = await clack.select<T>(opts);
 	return ensureNotCancelled(result);
 }
@@ -86,7 +89,9 @@ export async function askMultiSelect<T extends string>(
 	options: PromptOption<T>[],
 	initialValues?: T[],
 ): Promise<T[]> {
-	const clackOptions = toClackOptions(options) as MultiSelectOptions<T>['options'];
+	const clackOptions = toClackOptions(
+		options,
+	) as MultiSelectOptions<T>['options'];
 	const opts: MultiSelectOptions<T> = {
 		message,
 		options: clackOptions,
@@ -97,11 +102,17 @@ export async function askMultiSelect<T extends string>(
 	return ensureNotCancelled(result);
 }
 
-export async function askConfirm(message: string, initial = true): Promise<boolean> {
+export async function askConfirm(
+	message: string,
+	initial = true,
+): Promise<boolean> {
 	const result = await clack.confirm({ message, initialValue: initial });
 	return ensureNotCancelled(result);
 }
 
-export function spinner(): { start: (msg: string) => void; stop: (msg?: string) => void } {
+export function spinner(): {
+	start: (msg: string) => void;
+	stop: (msg?: string) => void;
+} {
 	return clack.spinner();
 }

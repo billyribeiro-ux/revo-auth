@@ -4,9 +4,9 @@ import { ofetch } from 'ofetch';
 import { resolve } from 'pathe';
 import { resolveProjectPaths } from '../detect/paths.js';
 import {
-	error as logError,
 	info,
 	intro,
+	error as logError,
 	outro,
 	success,
 	warn,
@@ -64,7 +64,10 @@ export const doctorCommand = defineCommand({
 			problems++;
 		} else {
 			const src = readFileSync(paths.hooksServer, 'utf8');
-			if (/\$lib\/auth\/server/.test(src) && /sequence\s*\(\s*revoAuth/.test(src)) {
+			if (
+				/\$lib\/auth\/server/.test(src) &&
+				/sequence\s*\(\s*revoAuth/.test(src)
+			) {
 				success('hooks.server.ts wired');
 			} else {
 				logError('hooks.server.ts does not reference revoAuth in sequence()');
@@ -94,10 +97,15 @@ export const doctorCommand = defineCommand({
 		}
 
 		// server health
-		const serverUrl = env.get('REVO_AUTH_SERVER_URL') ?? process.env.REVO_AUTH_SERVER_URL;
+		const serverUrl =
+			env.get('REVO_AUTH_SERVER_URL') ?? process.env.REVO_AUTH_SERVER_URL;
 		if (serverUrl) {
 			try {
-				await ofetch.raw('/health', { baseURL: serverUrl, method: 'HEAD', timeout: 5000 });
+				await ofetch.raw('/health', {
+					baseURL: serverUrl,
+					method: 'HEAD',
+					timeout: 5000,
+				});
 				success(`server reachable at ${serverUrl}`);
 			} catch (err) {
 				warn(

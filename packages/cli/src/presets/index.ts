@@ -17,7 +17,11 @@ export function getPreset(name: string): Preset | undefined {
 	return PRESETS[name];
 }
 
-export function listPresets(): { value: string; label: string; hint: string }[] {
+export function listPresets(): {
+	value: string;
+	label: string;
+	hint: string;
+}[] {
 	return [
 		{
 			value: 'trading-platform',

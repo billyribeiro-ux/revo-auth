@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { parseModule, type ProxifiedModule } from 'magicast';
+import { type ProxifiedModule, parseModule } from 'magicast';
 
 export interface ConfigMergeResult {
 	path: string;
@@ -15,7 +15,10 @@ export interface ConfigMergeResult {
  */
 export type DefaultsMap = Record<string, unknown>;
 
-function hasKey(mod: ProxifiedModule<Record<string, unknown>>, key: string): boolean {
+function hasKey(
+	mod: ProxifiedModule<Record<string, unknown>>,
+	key: string,
+): boolean {
 	const exports = mod.exports as { default?: Record<string, unknown> };
 	const cfg = exports.default;
 	if (!cfg || typeof cfg !== 'object') return false;
@@ -25,7 +28,10 @@ function hasKey(mod: ProxifiedModule<Record<string, unknown>>, key: string): boo
 /**
  * Create `auth.config.ts` from scratch.
  */
-export function writeFreshConfig(path: string, defaults: DefaultsMap): ConfigMergeResult {
+export function writeFreshConfig(
+	path: string,
+	defaults: DefaultsMap,
+): ConfigMergeResult {
 	const body = `import { defineAuthConfig } from '@revo-auth/sdk-sveltekit';
 
 export default defineAuthConfig(${JSON.stringify(defaults, null, 2)});
@@ -46,7 +52,10 @@ export default defineAuthConfig(${JSON.stringify(defaults, null, 2)});
  * has an incompatible shape), writes a `.orig` sidecar with the template
  * and reports the conflict.
  */
-export function mergeAuthConfig(path: string, defaults: DefaultsMap): ConfigMergeResult {
+export function mergeAuthConfig(
+	path: string,
+	defaults: DefaultsMap,
+): ConfigMergeResult {
 	if (!existsSync(path)) {
 		return writeFreshConfig(path, defaults);
 	}

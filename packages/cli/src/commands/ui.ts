@@ -3,7 +3,14 @@ import { createRequire } from 'node:module';
 import { defineCommand } from 'citty';
 import { dirname, resolve } from 'pathe';
 import { resolveProjectPaths } from '../detect/paths.js';
-import { error as logError, info, intro, outro, success, warn } from '../prompts.js';
+import {
+	info,
+	intro,
+	error as logError,
+	outro,
+	success,
+	warn,
+} from '../prompts.js';
 
 const COMPONENTS = [
 	'login-form',
@@ -25,7 +32,7 @@ type Component = (typeof COMPONENTS)[number];
 function toPascal(name: string): string {
 	return name
 		.split('-')
-		.map((s) => (s.length > 0 ? s[0]!.toUpperCase() + s.slice(1) : s))
+		.map((s) => (s.length > 0 ? (s[0] ?? '').toUpperCase() + s.slice(1) : s))
 		.join('');
 }
 
@@ -59,7 +66,9 @@ export const uiCommand = defineCommand({
 		);
 		for (const entry of list) requested.add(entry);
 
-		const invalid = [...requested].filter((c) => !COMPONENTS.includes(c as Component));
+		const invalid = [...requested].filter(
+			(c) => !COMPONENTS.includes(c as Component),
+		);
 		if (invalid.length > 0) {
 			logError(`Unknown components: ${invalid.join(', ')}`);
 			info(`Available: ${COMPONENTS.join(', ')}`);
@@ -103,7 +112,10 @@ export const uiCommand = defineCommand({
 		const barrel = resolve(paths.authComponentsDir, 'index.ts');
 		if (!existsSync(barrel)) {
 			const exports = [...requested]
-				.map((c) => `export { default as ${toPascal(c)} } from './${toPascal(c)}.svelte';`)
+				.map(
+					(c) =>
+						`export { default as ${toPascal(c)} } from './${toPascal(c)}.svelte';`,
+				)
 				.join('\n');
 			writeFileSync(barrel, `${exports}\n`, 'utf8');
 			success('wrote components/index.ts');

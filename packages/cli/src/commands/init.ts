@@ -12,31 +12,51 @@ import { resolveProjectPaths } from '../detect/paths.js';
 import { detectPackageManager } from '../detect/pm.js';
 import { getPreset, listPresets } from '../presets/index.js';
 import {
-	error as logError,
-	info,
-	intro,
-	note,
-	outro,
 	askConfirm,
 	askMultiSelect,
 	askSelect,
 	askText,
+	info,
+	intro,
+	error as logError,
+	note,
+	outro,
 	spinner,
 	success,
 	warn,
 } from '../prompts.js';
-import { appendGitignore, findTemplatesRoot, type ScaffoldFile, scaffoldFiles } from '../scaffold.js';
-import { emptyManifest, readManifest, writeManifest } from '../templates/manifest.js';
+import {
+	type ScaffoldFile,
+	appendGitignore,
+	findTemplatesRoot,
+	scaffoldFiles,
+} from '../scaffold.js';
+import {
+	emptyManifest,
+	readManifest,
+	writeManifest,
+} from '../templates/manifest.js';
 
 const CLI_VERSION = '0.1.0';
 
 export const initCommand = defineCommand({
-	meta: { name: 'init', description: 'Initialize Revo-Auth in a SvelteKit project' },
+	meta: {
+		name: 'init',
+		description: 'Initialize Revo-Auth in a SvelteKit project',
+	},
 	args: {
 		preset: { type: 'string', description: 'Preset name', required: false },
 		server: { type: 'string', description: 'Auth server URL', required: false },
-		yes: { type: 'boolean', description: 'Accept defaults without prompts', default: false },
-		cwd: { type: 'string', description: 'Project root', default: process.cwd() },
+		yes: {
+			type: 'boolean',
+			description: 'Accept defaults without prompts',
+			default: false,
+		},
+		cwd: {
+			type: 'string',
+			description: 'Project root',
+			default: process.cwd(),
+		},
 	},
 	async run({ args }) {
 		const cwd = args.cwd;
@@ -53,11 +73,16 @@ export const initCommand = defineCommand({
 		if (!framework.ok) {
 			for (const err of framework.errors) logError(err);
 			if (!framework.info.hasTypeScript) {
-				const fix = args.yes ? true : await askConfirm('Install TypeScript now?', true);
+				const fix = args.yes
+					? true
+					: await askConfirm('Install TypeScript now?', true);
 				if (fix) {
 					const s = spinner();
 					s.start('Installing typescript');
-					await execa('pnpm', ['add', '-D', 'typescript'], { cwd, stdio: 'pipe' });
+					await execa('pnpm', ['add', '-D', 'typescript'], {
+						cwd,
+						stdio: 'pipe',
+					});
 					s.stop('typescript installed');
 					if (!framework.info.hasTsConfig) {
 						await execa(
@@ -74,7 +99,10 @@ export const initCommand = defineCommand({
 					return;
 				}
 			}
-			if (framework.info.sveltekitMajor !== null && framework.info.sveltekitMajor < 2) {
+			if (
+				framework.info.sveltekitMajor !== null &&
+				framework.info.sveltekitMajor < 2
+			) {
 				process.exitCode = 1;
 				return;
 			}
@@ -87,8 +115,10 @@ export const initCommand = defineCommand({
 		const config = await gatherConfig(args);
 		const paths = resolveProjectPaths(cwd);
 
-		if (!existsSync(paths.manifestDir)) mkdirSync(paths.manifestDir, { recursive: true });
-		const manifest = readManifest(paths.manifestFile) ?? emptyManifest(CLI_VERSION);
+		if (!existsSync(paths.manifestDir))
+			mkdirSync(paths.manifestDir, { recursive: true });
+		const manifest =
+			readManifest(paths.manifestFile) ?? emptyManifest(CLI_VERSION);
 
 		// Register app if master key present
 		const masterKey = process.env.REVO_AUTH_MASTER_KEY;
@@ -126,11 +156,26 @@ export const initCommand = defineCommand({
 		const templatesRoot = findTemplatesRoot();
 		const files: ScaffoldFile[] = [
 			{ template: 'sveltekit/auth.config.ts.hbs', outRel: 'auth.config.ts' },
-			{ template: 'sveltekit/lib/client.ts.hbs', outRel: 'src/lib/auth/client.ts' },
-			{ template: 'sveltekit/lib/server.ts.hbs', outRel: 'src/lib/auth/server.ts' },
-			{ template: 'sveltekit/lib/middleware.ts.hbs', outRel: 'src/lib/auth/middleware.ts' },
-			{ template: 'sveltekit/lib/types.ts.hbs', outRel: 'src/lib/auth/types.ts' },
-			{ template: 'sveltekit/routes/login.svelte.hbs', outRel: 'src/routes/auth/login/+page.svelte' },
+			{
+				template: 'sveltekit/lib/client.ts.hbs',
+				outRel: 'src/lib/auth/client.ts',
+			},
+			{
+				template: 'sveltekit/lib/server.ts.hbs',
+				outRel: 'src/lib/auth/server.ts',
+			},
+			{
+				template: 'sveltekit/lib/middleware.ts.hbs',
+				outRel: 'src/lib/auth/middleware.ts',
+			},
+			{
+				template: 'sveltekit/lib/types.ts.hbs',
+				outRel: 'src/lib/auth/types.ts',
+			},
+			{
+				template: 'sveltekit/routes/login.svelte.hbs',
+				outRel: 'src/routes/auth/login/+page.svelte',
+			},
 			{
 				template: 'sveltekit/routes/signup.svelte.hbs',
 				outRel: 'src/routes/auth/signup/+page.svelte',
@@ -152,7 +197,10 @@ export const initCommand = defineCommand({
 		for (const method of config.methods) {
 			const providerTemplate = `sveltekit/providers/${method}.ts.hbs`;
 			if (existsSync(`${templatesRoot}/${providerTemplate}`)) {
-				files.push({ template: providerTemplate, outRel: `src/lib/auth/providers/${method}.ts` });
+				files.push({
+					template: providerTemplate,
+					outRel: `src/lib/auth/providers/${method}.ts`,
+				});
 			}
 		}
 
@@ -165,9 +213,16 @@ export const initCommand = defineCommand({
 			preset: config.preset,
 		};
 
-		const scaffoldResult = scaffoldFiles(cwd, templatesRoot, files, context, manifest);
+		const scaffoldResult = scaffoldFiles(
+			cwd,
+			templatesRoot,
+			files,
+			context,
+			manifest,
+		);
 		for (const w of scaffoldResult.written) success(`wrote ${w}`);
-		for (const s of scaffoldResult.skipped) warn(`skipped ${s} (already exists, unmanaged)`);
+		for (const s of scaffoldResult.skipped)
+			warn(`skipped ${s} (already exists, unmanaged)`);
 
 		// auth.config.ts is user-owned — ensure defaults merge (no overwrite) on re-init.
 		if (existsSync(paths.authConfig) && manifest.files['auth.config.ts']) {
@@ -183,7 +238,8 @@ export const initCommand = defineCommand({
 		// hooks.server.ts merge
 		const hooks = mergeHooksServer(paths.hooksServer);
 		if (hooks.created) success('created src/hooks.server.ts');
-		else if (hooks.changed) success('updated src/hooks.server.ts (wrapped existing handle)');
+		else if (hooks.changed)
+			success('updated src/hooks.server.ts (wrapped existing handle)');
 		else info('src/hooks.server.ts already wired');
 
 		// .env
@@ -201,20 +257,29 @@ export const initCommand = defineCommand({
 				value: e.key === 'REVO_AUTH_SERVER_URL' ? config.serverUrl : '',
 			})),
 		);
-		if (envResult.added.length > 0) success(`.env: added ${envResult.added.join(', ')}`);
+		if (envResult.added.length > 0)
+			success(`.env: added ${envResult.added.join(', ')}`);
 		if (envExampleResult.added.length > 0)
 			success(`.env.example: added ${envExampleResult.added.join(', ')}`);
 
 		// .gitignore
-		const added = appendGitignore(paths.gitignore, ['.revo-auth/', 'auth.secret.*', '.env']);
+		const added = appendGitignore(paths.gitignore, [
+			'.revo-auth/',
+			'auth.secret.*',
+			'.env',
+		]);
 		if (added.length > 0) success(`.gitignore: added ${added.join(', ')}`);
 
 		// Install deps
 		if (!args.yes || process.env.REVO_AUTH_SKIP_INSTALL !== '1') {
-			const doInstall = args.yes ? true : await askConfirm('Install SDK + UI packages now?', true);
+			const doInstall = args.yes
+				? true
+				: await askConfirm('Install SDK + UI packages now?', true);
 			if (doInstall && process.env.REVO_AUTH_SKIP_INSTALL !== '1') {
 				const s = spinner();
-				s.start('pnpm install @revo-auth/sdk-sveltekit @revo-auth/ui-sveltekit');
+				s.start(
+					'pnpm install @revo-auth/sdk-sveltekit @revo-auth/ui-sveltekit',
+				);
 				try {
 					await execa(
 						'pnpm',
@@ -241,7 +306,7 @@ export const initCommand = defineCommand({
 				'Next steps:',
 				'  1. Set OAuth credentials in .env (see provider setup docs).',
 				'  2. pnpm dev',
-				`  3. Visit /auth/login to verify the flow.`,
+				'  3. Visit /auth/login to verify the flow.',
 			].join('\n'),
 			'Revo-Auth ready',
 		);
@@ -259,7 +324,11 @@ async function gatherConfig(args: {
 	let serverUrl = args.server ?? defaultServer;
 
 	if (!args.yes && args.preset === undefined) {
-		presetName = await askSelect('Pick a preset', listPresets(), 'trading-platform');
+		presetName = await askSelect(
+			'Pick a preset',
+			listPresets(),
+			'trading-platform',
+		);
 	}
 	if (!args.yes && args.server === undefined) {
 		serverUrl = await askText('Auth server URL', defaultServer);

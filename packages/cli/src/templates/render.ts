@@ -41,13 +41,19 @@ function registerHelpers(engine: typeof Handlebars): void {
 const engine = Handlebars.create();
 registerHelpers(engine);
 
-export function renderTemplate(templatePath: string, context: RenderContext): string {
+export function renderTemplate(
+	templatePath: string,
+	context: RenderContext,
+): string {
 	const source = readFileSync(templatePath, 'utf8');
 	const compiled = engine.compile(source, { noEscape: true });
 	return compiled(context);
 }
 
-export function renderTemplateFromString(source: string, context: RenderContext): string {
+export function renderTemplateFromString(
+	source: string,
+	context: RenderContext,
+): string {
 	const compiled = engine.compile(source, { noEscape: true });
 	return compiled(context);
 }
@@ -61,6 +67,9 @@ export function hashContent(input: string): string {
  * The CLI ships templates alongside the built bin; this helper produces an
  * absolute path from a logical relative path such as "sveltekit/lib/client.ts.hbs".
  */
-export function resolveTemplatePath(templatesRoot: string, relPath: string): string {
+export function resolveTemplatePath(
+	templatesRoot: string,
+	relPath: string,
+): string {
 	return resolve(templatesRoot, relPath);
 }

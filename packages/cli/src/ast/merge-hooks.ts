@@ -33,7 +33,10 @@ export function mergeHooksServer(path: string): MergeHooksResult {
 	}
 
 	const original = readFileSync(path, 'utf8');
-	if (original.includes(MARKER) || /from '\$lib\/auth\/server'/.test(original)) {
+	if (
+		original.includes(MARKER) ||
+		/from '\$lib\/auth\/server'/.test(original)
+	) {
 		return { path, created: false, changed: false, content: original };
 	}
 
@@ -47,18 +50,26 @@ export function mergeHooksServer(path: string): MergeHooksResult {
 		next = `${REVO_IMPORT}\n${next}`;
 	}
 
-	const handleExport = /export\s+const\s+handle(?:\s*:\s*[^=]+)?\s*=\s*([^;]+);?/m;
+	const handleExport =
+		/export\s+const\s+handle(?:\s*:\s*[^=]+)?\s*=\s*([^;]+);?/m;
 	const match = next.match(handleExport);
 	if (match) {
-		const existingExpr = match[1]?.trim() ?? 'async ({ event, resolve }) => resolve(event)';
+		const existingExpr =
+			match[1]?.trim() ?? 'async ({ event, resolve }) => resolve(event)';
 		const replacement = `${MARKER}\nexport const handle: Handle = sequence(revoAuth, ${existingExpr});`;
 		next = next.replace(handleExport, replacement);
-		if (!/import\s+type\s*\{[^}]*\bHandle\b[^}]*\}\s*from\s*'@sveltejs\/kit'/.test(next)) {
+		if (
+			!/import\s+type\s*\{[^}]*\bHandle\b[^}]*\}\s*from\s*'@sveltejs\/kit'/.test(
+				next,
+			)
+		) {
 			next = `import type { Handle } from '@sveltejs/kit';\n${next}`;
 		}
 	} else {
 		const hasHandleType =
-			/import\s+type\s*\{[^}]*\bHandle\b[^}]*\}\s*from\s*'@sveltejs\/kit'/.test(next);
+			/import\s+type\s*\{[^}]*\bHandle\b[^}]*\}\s*from\s*'@sveltejs\/kit'/.test(
+				next,
+			);
 		const trailer = `\n${MARKER}\n${hasHandleType ? '' : "import type { Handle } from '@sveltejs/kit';\n"}export const handle: Handle = sequence(revoAuth);\n`;
 		next = `${next.replace(/\s*$/, '')}\n${trailer}`;
 	}

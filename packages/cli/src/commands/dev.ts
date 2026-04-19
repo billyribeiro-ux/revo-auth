@@ -1,9 +1,9 @@
 import { defineCommand } from 'citty';
 import { execa } from 'execa';
 import {
-	error as logError,
 	info,
 	intro,
+	error as logError,
 	note,
 	outro,
 	success,
@@ -28,7 +28,10 @@ async function hasFly(): Promise<boolean> {
 }
 
 export const devCommand = defineCommand({
-	meta: { name: 'dev', description: 'Start a local Revo-Auth server via Docker' },
+	meta: {
+		name: 'dev',
+		description: 'Start a local Revo-Auth server via Docker',
+	},
 	args: {
 		port: { type: 'string', default: '8787', description: 'Port to bind' },
 		image: {
@@ -51,7 +54,7 @@ export const devCommand = defineCommand({
 						'-p',
 						`${args.port}:8787`,
 						'-e',
-						`REVO_AUTH_PORT=8787`,
+						'REVO_AUTH_PORT=8787',
 						args.image,
 					],
 					{ stdio: 'inherit' },
@@ -76,7 +79,9 @@ export const devCommand = defineCommand({
 				outro('Done.');
 				return;
 			} catch (err) {
-				logError(`fly dev failed: ${err instanceof Error ? err.message : String(err)}`);
+				logError(
+					`fly dev failed: ${err instanceof Error ? err.message : String(err)}`,
+				);
 				process.exitCode = 1;
 				return;
 			}

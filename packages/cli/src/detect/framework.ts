@@ -68,12 +68,17 @@ export function detectFramework(cwd: string): FrameworkCheck {
 	const sveltekitMajor = coerceMajor(sveltekitVersion);
 	const hasTypeScript = Boolean(deps.typescript);
 	const hasTsConfig =
-		existsSync(resolve(cwd, 'tsconfig.json')) || existsSync(resolve(cwd, 'jsconfig.json'));
+		existsSync(resolve(cwd, 'tsconfig.json')) ||
+		existsSync(resolve(cwd, 'jsconfig.json'));
 
-	const framework: FrameworkInfo['framework'] = sveltekitVersion ? 'sveltekit' : 'unknown';
+	const framework: FrameworkInfo['framework'] = sveltekitVersion
+		? 'sveltekit'
+		: 'unknown';
 
 	if (framework !== 'sveltekit') {
-		errors.push('SvelteKit is required. Could not find @sveltejs/kit in dependencies.');
+		errors.push(
+			'SvelteKit is required. Could not find @sveltejs/kit in dependencies.',
+		);
 	}
 	if (sveltekitMajor !== null && sveltekitMajor < 2) {
 		errors.push(

@@ -35,7 +35,9 @@ function joinLines(lines: string[]): string {
 function lcsMatrix(a: string[], b: string[]): number[][] {
 	const m = a.length;
 	const n = b.length;
-	const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
+	const dp: number[][] = Array.from({ length: m + 1 }, () =>
+		new Array<number>(n + 1).fill(0),
+	);
 	for (let i = 1; i <= m; i++) {
 		for (let j = 1; j <= n; j++) {
 			const rowPrev = dp[i - 1];
@@ -87,7 +89,13 @@ function chunkDiff(a: string[], b: string[]): Chunk[] {
 	let bi = 0;
 	for (const pair of pairs) {
 		if (ai < pair.i || bi < pair.j) {
-			chunks.push({ matched: false, aStart: ai, aEnd: pair.i, bStart: bi, bEnd: pair.j });
+			chunks.push({
+				matched: false,
+				aStart: ai,
+				aEnd: pair.i,
+				bStart: bi,
+				bEnd: pair.j,
+			});
 		}
 		chunks.push({
 			matched: true,
@@ -100,7 +108,13 @@ function chunkDiff(a: string[], b: string[]): Chunk[] {
 		bi = pair.j + 1;
 	}
 	if (ai < a.length || bi < b.length) {
-		chunks.push({ matched: false, aStart: ai, aEnd: a.length, bStart: bi, bEnd: b.length });
+		chunks.push({
+			matched: false,
+			aStart: ai,
+			aEnd: a.length,
+			bStart: bi,
+			bEnd: b.length,
+		});
 	}
 	return chunks;
 }
@@ -109,7 +123,11 @@ function chunkDiff(a: string[], b: string[]): Chunk[] {
  * 3-way merge. We compute base->ours and base->theirs diffs, then walk base
  * forward. For each base line we look at whether ours/theirs made a change.
  */
-export function merge3(base: string, ours: string, theirs: string): MergeResult {
+export function merge3(
+	base: string,
+	ours: string,
+	theirs: string,
+): MergeResult {
 	const baseLines = splitLines(base);
 	const oursLines = splitLines(ours);
 	const theirsLines = splitLines(theirs);
@@ -128,7 +146,10 @@ export function merge3(base: string, ours: string, theirs: string): MergeResult 
 		replace: boolean;
 		with: string[];
 	}
-	const buildEdits = (chunks: Chunk[], otherLines: string[]): Map<number, Edit[]> => {
+	const buildEdits = (
+		chunks: Chunk[],
+		otherLines: string[],
+	): Map<number, Edit[]> => {
 		const edits = new Map<number, Edit[]>();
 		for (const chunk of chunks) {
 			if (chunk.matched) continue;
@@ -172,7 +193,13 @@ export function merge3(base: string, ours: string, theirs: string): MergeResult 
 				out.push(...oursWith);
 			} else {
 				const start = out.length;
-				out.push('<<<<<<< ours', ...oursWith, '=======', ...theirsWith, '>>>>>>> theirs');
+				out.push(
+					'<<<<<<< ours',
+					...oursWith,
+					'=======',
+					...theirsWith,
+					'>>>>>>> theirs',
+				);
 				conflicts.push({
 					oursStart: start + 1,
 					oursEnd: start + 1 + oursWith.length,
@@ -180,9 +207,15 @@ export function merge3(base: string, ours: string, theirs: string): MergeResult 
 					theirsEnd: start + 2 + oursWith.length + theirsWith.length,
 				});
 			}
-			const skip = Math.max(oursReplaceEnd.get(idx) ?? idx, theirsReplaceEnd.get(idx) ?? idx);
+			const skip = Math.max(
+				oursReplaceEnd.get(idx) ?? idx,
+				theirsReplaceEnd.get(idx) ?? idx,
+			);
 			idx = skip === idx ? idx : skip;
-			if (idx < baseLines.length && !(oursReplaceEnd.get(idx) || theirsReplaceEnd.get(idx))) {
+			if (
+				idx < baseLines.length &&
+				!(oursReplaceEnd.get(idx) || theirsReplaceEnd.get(idx))
+			) {
 				// no replacement at this base line; emit the base line and advance
 				const baseLine = baseLines[idx];
 				if (baseLine !== undefined) out.push(baseLine);

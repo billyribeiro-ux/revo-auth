@@ -4,26 +4,37 @@ import { resolve } from 'pathe';
 import { resolveProjectPaths } from '../detect/paths.js';
 import { merge3 } from '../diff.js';
 import {
-	error as logError,
 	info,
 	intro,
+	error as logError,
 	note,
 	outro,
 	success,
 	warn,
 } from '../prompts.js';
 import { findTemplatesRoot } from '../scaffold.js';
-import { readManifest, writeManifest, type Manifest } from '../templates/manifest.js';
+import {
+	type Manifest,
+	readManifest,
+	writeManifest,
+} from '../templates/manifest.js';
 import { hashContent, renderTemplate } from '../templates/render.js';
 
 const CLI_VERSION = '0.1.0';
 
 export const updateCommand = defineCommand({
-	meta: { name: 'update', description: 'Update scaffolded files to the latest templates' },
+	meta: {
+		name: 'update',
+		description: 'Update scaffolded files to the latest templates',
+	},
 	args: {
 		interactive: { type: 'boolean', default: false },
 		auto: { type: 'boolean', default: false },
-		cwd: { type: 'string', description: 'Project root', default: process.cwd() },
+		cwd: {
+			type: 'string',
+			description: 'Project root',
+			default: process.cwd(),
+		},
 	},
 	async run({ args }) {
 		const cwd = args.cwd;
@@ -31,14 +42,17 @@ export const updateCommand = defineCommand({
 		const paths = resolveProjectPaths(cwd);
 		const manifest = readManifest(paths.manifestFile);
 		if (!manifest) {
-			logError('No .revo-auth/manifest.json found. Run `revo-auth init` first.');
+			logError(
+				'No .revo-auth/manifest.json found. Run `revo-auth init` first.',
+			);
 			process.exitCode = 1;
 			return;
 		}
 		const templatesRoot = findTemplatesRoot();
 
 		const context = {
-			serverUrl: process.env.REVO_AUTH_SERVER_URL ?? 'https://auth.revo-auth.dev',
+			serverUrl:
+				process.env.REVO_AUTH_SERVER_URL ?? 'https://auth.revo-auth.dev',
 			appId: process.env.REVO_AUTH_APP_ID ?? 'app_local_dev',
 			methods: [],
 			features: [],
@@ -126,7 +140,9 @@ export const updateCommand = defineCommand({
 		}
 
 		if (!args.auto && args.interactive) {
-			info('Interactive resolution is not yet implemented; edit conflicts manually.');
+			info(
+				'Interactive resolution is not yet implemented; edit conflicts manually.',
+			);
 		}
 
 		outro('Update complete.');

@@ -2,9 +2,24 @@ import { existsSync } from 'node:fs';
 import { defineCommand } from 'citty';
 import { mergeAuthConfig } from '../ast/merge-config.js';
 import { resolveProjectPaths } from '../detect/paths.js';
-import { error as logError, info, intro, outro, success, warn } from '../prompts.js';
-import { findTemplatesRoot, scaffoldFiles, type ScaffoldFile } from '../scaffold.js';
-import { emptyManifest, readManifest, writeManifest } from '../templates/manifest.js';
+import {
+	info,
+	intro,
+	error as logError,
+	outro,
+	success,
+	warn,
+} from '../prompts.js';
+import {
+	type ScaffoldFile,
+	findTemplatesRoot,
+	scaffoldFiles,
+} from '../scaffold.js';
+import {
+	emptyManifest,
+	readManifest,
+	writeManifest,
+} from '../templates/manifest.js';
 
 const CLI_VERSION = '0.1.0';
 
@@ -27,24 +42,42 @@ const FEATURES = [
 type Feature = (typeof FEATURES)[number];
 
 export const addCommand = defineCommand({
-	meta: { name: 'add', description: 'Add a feature (provider or module) to an existing project' },
+	meta: {
+		name: 'add',
+		description: 'Add a feature (provider or module) to an existing project',
+	},
 	args: {
-		feature: { type: 'positional', required: true, description: `One of: ${FEATURES.join(', ')}` },
-		force: { type: 'boolean', description: 'Overwrite existing files', default: false },
-		cwd: { type: 'string', description: 'Project root', default: process.cwd() },
+		feature: {
+			type: 'positional',
+			required: true,
+			description: `One of: ${FEATURES.join(', ')}`,
+		},
+		force: {
+			type: 'boolean',
+			description: 'Overwrite existing files',
+			default: false,
+		},
+		cwd: {
+			type: 'string',
+			description: 'Project root',
+			default: process.cwd(),
+		},
 	},
 	async run({ args }) {
 		const cwd = args.cwd;
 		const feature = args.feature as Feature;
 		if (!FEATURES.includes(feature)) {
-			logError(`Unknown feature "${feature}". Available: ${FEATURES.join(', ')}`);
+			logError(
+				`Unknown feature "${feature}". Available: ${FEATURES.join(', ')}`,
+			);
 			process.exitCode = 1;
 			return;
 		}
 		intro(`Revo-Auth add ${feature}`);
 
 		const paths = resolveProjectPaths(cwd);
-		const manifest = readManifest(paths.manifestFile) ?? emptyManifest(CLI_VERSION);
+		const manifest =
+			readManifest(paths.manifestFile) ?? emptyManifest(CLI_VERSION);
 		const templatesRoot = findTemplatesRoot();
 
 		const files: ScaffoldFile[] = [];
@@ -61,7 +94,9 @@ export const addCommand = defineCommand({
 					outRel: `src/lib/auth/providers/${feature}.ts`,
 					...(args.force ? {} : { skipIfUnmanagedExists: true }),
 				});
-				configPatch = { methods: { [feature]: { enabled: feature !== 'apple' } } };
+				configPatch = {
+					methods: { [feature]: { enabled: feature !== 'apple' } },
+				};
 				break;
 			}
 			case 'discord': {
@@ -102,23 +137,32 @@ export const addCommand = defineCommand({
 
 		if (files.length > 0) {
 			const context = {
-				serverUrl: process.env.REVO_AUTH_SERVER_URL ?? 'https://auth.revo-auth.dev',
+				serverUrl:
+					process.env.REVO_AUTH_SERVER_URL ?? 'https://auth.revo-auth.dev',
 				appId: process.env.REVO_AUTH_APP_ID ?? 'app_local_dev',
 				methods: [feature],
 				features: [],
 				session: 'cookie' as const,
 				preset: 'custom',
 			};
-			const result = scaffoldFiles(cwd, templatesRoot, files, context, manifest);
+			const result = scaffoldFiles(
+				cwd,
+				templatesRoot,
+				files,
+				context,
+				manifest,
+			);
 			for (const w of result.written) success(`wrote ${w}`);
-			for (const s of result.skipped) warn(`skipped ${s} (exists; use --force)`);
+			for (const s of result.skipped)
+				warn(`skipped ${s} (exists; use --force)`);
 		}
 
 		if (!existsSync(paths.authConfig)) {
 			warn('auth.config.ts not found — run `revo-auth init` first.');
 		} else {
 			const merge = mergeAuthConfig(paths.authConfig, configPatch);
-			if (merge.added.length > 0) success(`auth.config.ts: added ${merge.added.join(', ')}`);
+			if (merge.added.length > 0)
+				success(`auth.config.ts: added ${merge.added.join(', ')}`);
 			else info('auth.config.ts already has this feature');
 			for (const c of merge.conflicts) logError(c);
 		}

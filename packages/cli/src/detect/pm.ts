@@ -12,7 +12,12 @@ export interface PackageManagerCheck {
  */
 export function detectPackageManager(cwd: string): PackageManagerCheck {
 	const foreignLocks: string[] = [];
-	const candidates = ['package-lock.json', 'yarn.lock', 'bun.lockb', 'bun.lock'];
+	const candidates = [
+		'package-lock.json',
+		'yarn.lock',
+		'bun.lockb',
+		'bun.lock',
+	];
 	for (const name of candidates) {
 		if (existsSync(resolve(cwd, name))) {
 			foreignLocks.push(name);
@@ -25,7 +30,7 @@ export function detectPackageManager(cwd: string): PackageManagerCheck {
 			message: [
 				'Revo-Auth requires pnpm.',
 				`Detected foreign lockfile(s): ${foreignLocks.join(', ')}.`,
-				`Delete them and run \`pnpm import\` then \`pnpm install\`.`,
+				'Delete them and run `pnpm import` then `pnpm install`.',
 			].join('\n'),
 		};
 	}

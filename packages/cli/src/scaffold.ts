@@ -3,7 +3,11 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'pathe';
 import type { Manifest } from './templates/manifest.js';
 import { setManifestEntry } from './templates/manifest.js';
-import { hashContent, renderTemplate, type RenderContext } from './templates/render.js';
+import {
+	type RenderContext,
+	hashContent,
+	renderTemplate,
+} from './templates/render.js';
 
 /**
  * Locate the templates directory that ships with this package.
@@ -58,7 +62,11 @@ export function scaffoldFiles(
 		const rendered = renderTemplate(templatePath, context);
 		const templateHash = hashContent(readFileSync(templatePath, 'utf8'));
 
-		if (existsSync(outAbs) && file.skipIfUnmanagedExists && !manifest.files[file.outRel]) {
+		if (
+			existsSync(outAbs) &&
+			file.skipIfUnmanagedExists &&
+			!manifest.files[file.outRel]
+		) {
 			skipped.push(file.outRel);
 			continue;
 		}
