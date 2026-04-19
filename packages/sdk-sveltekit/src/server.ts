@@ -1,4 +1,8 @@
-import { type ClientAPI, type RevoAuthConfig, createClient } from '@revo-auth/sdk-core';
+import {
+	type ClientAPI,
+	type RevoAuthConfig,
+	createClient,
+} from '@revo-auth/sdk-core';
 import type { RequestEvent } from '@sveltejs/kit';
 
 const CSRF_COOKIE = '__Host-revoauth.csrf';
@@ -16,7 +20,10 @@ export interface ServerClientOptions {
  * `event.fetch` so cookies flow through during SSR, and forwards the
  * client's cookie header + CSRF cookie to the auth server.
  */
-export function createServerClient(event: RequestEvent, options: ServerClientOptions): ClientAPI {
+export function createServerClient(
+	event: RequestEvent,
+	options: ServerClientOptions,
+): ClientAPI {
 	const cookieHeader = event.request.headers.get('cookie');
 	const csrfToken = event.cookies.get(CSRF_COOKIE);
 

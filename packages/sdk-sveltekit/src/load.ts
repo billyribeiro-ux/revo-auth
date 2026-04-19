@@ -1,5 +1,5 @@
 import type { RevoAuthSession } from '@revo-auth/sdk-core';
-import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { type RequestEvent, redirect } from '@sveltejs/kit';
 import { getCachedSession } from './hooks.js';
 
 export interface RequireAuthOptions {
@@ -13,7 +13,10 @@ export interface RequireAuthOptions {
  * Throws a SvelteKit `redirect(302)` to the login path if the user has no
  * active session. Otherwise returns the session.
  */
-export function requireAuth(event: RequestEvent, options: RequireAuthOptions = {}): RevoAuthSession {
+export function requireAuth(
+	event: RequestEvent,
+	options: RequireAuthOptions = {},
+): RevoAuthSession {
 	const session = getCachedSession(event);
 	if (session !== null) {
 		return session;

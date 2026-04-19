@@ -31,7 +31,8 @@ export function handleAuth(options: AuthHookOptions): Handle {
 			return resolve(event);
 		}
 
-		const hasSessionCookie = event.cookies.get('__Host-revoauth.session') !== undefined;
+		const hasSessionCookie =
+			event.cookies.get('__Host-revoauth.session') !== undefined;
 
 		let session: RevoAuthSession | null = null;
 		if (hasSessionCookie) {

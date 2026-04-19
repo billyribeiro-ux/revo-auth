@@ -39,25 +39,37 @@ export class RevoAuthError extends Error {
 }
 
 export class InvalidCredentialsError extends RevoAuthError {
-	constructor(message = 'Email or password is incorrect.', opts?: { requestId?: string }) {
+	constructor(
+		message = 'Email or password is incorrect.',
+		opts?: { requestId?: string },
+	) {
 		super('INVALID_CREDENTIALS', message, opts);
 		this.name = 'InvalidCredentialsError';
 	}
 }
 
 export class NetworkError extends RevoAuthError {
-	constructor(message = 'Network error while contacting Revo Auth server.', opts?: { requestId?: string; cause?: unknown }) {
+	constructor(
+		message = 'Network error while contacting Revo Auth server.',
+		opts?: { requestId?: string; cause?: unknown },
+	) {
 		super('NETWORK_ERROR', message, opts);
 		this.name = 'NetworkError';
 	}
 }
 
 export class ValidationError extends RevoAuthError {
-	public readonly issues: ReadonlyArray<{ path: ReadonlyArray<string | number>; message: string }>;
+	public readonly issues: ReadonlyArray<{
+		path: ReadonlyArray<string | number>;
+		message: string;
+	}>;
 
 	constructor(
 		message: string,
-		issues: ReadonlyArray<{ path: ReadonlyArray<string | number>; message: string }> = [],
+		issues: ReadonlyArray<{
+			path: ReadonlyArray<string | number>;
+			message: string;
+		}> = [],
 		opts?: { requestId?: string; cause?: unknown },
 	) {
 		super('VALIDATION_ERROR', message, opts);
@@ -89,7 +101,10 @@ export class SessionExpiredError extends RevoAuthError {
 }
 
 export class UnknownError extends RevoAuthError {
-	constructor(message = 'Unknown error.', opts?: { requestId?: string; cause?: unknown }) {
+	constructor(
+		message = 'Unknown error.',
+		opts?: { requestId?: string; cause?: unknown },
+	) {
 		super('UNKNOWN', message, opts);
 		this.name = 'UnknownError';
 	}

@@ -1,5 +1,11 @@
 import { defu } from 'defu';
-import { type $Fetch, type FetchOptions, FetchError, createFetch, ofetch } from 'ofetch';
+import {
+	type $Fetch,
+	FetchError,
+	type FetchOptions,
+	createFetch,
+	ofetch,
+} from 'ofetch';
 import type { ZodSchema } from 'zod';
 import { z } from 'zod';
 import {
@@ -84,17 +90,32 @@ export interface ClientAPI {
 	sessionRefresh(): Promise<Result<RevoAuthSession>>;
 	listSessions(): Promise<Result<ListResponse<RevoAuthSession>>>;
 	revokeSession(id: string): Promise<Result<OkResponse>>;
-	passwordResetRequest(input: PasswordResetRequestInput): Promise<Result<OkResponse>>;
-	passwordResetConfirm(input: PasswordResetConfirmInput): Promise<Result<OkResponse>>;
+	passwordResetRequest(
+		input: PasswordResetRequestInput,
+	): Promise<Result<OkResponse>>;
+	passwordResetConfirm(
+		input: PasswordResetConfirmInput,
+	): Promise<Result<OkResponse>>;
 	emailVerifyRequest(): Promise<Result<OkResponse>>;
-	emailVerifyConfirm(input: EmailVerifyConfirmInput): Promise<Result<OkResponse>>;
-	oauthAuthorizeUrl(provider: OAuthProvider, redirect?: string): Promise<Result<{ url: string }>>;
-	passkeyRegisterBegin(): Promise<Result<{ publicKey: Record<string, unknown> }>>;
-	passkeyRegisterFinish(response: Record<string, unknown>): Promise<Result<{ passkey: Passkey }>>;
+	emailVerifyConfirm(
+		input: EmailVerifyConfirmInput,
+	): Promise<Result<OkResponse>>;
+	oauthAuthorizeUrl(
+		provider: OAuthProvider,
+		redirect?: string,
+	): Promise<Result<{ url: string }>>;
+	passkeyRegisterBegin(): Promise<
+		Result<{ publicKey: Record<string, unknown> }>
+	>;
+	passkeyRegisterFinish(
+		response: Record<string, unknown>,
+	): Promise<Result<{ passkey: Passkey }>>;
 	passkeyAuthenticateBegin(
 		email?: string,
 	): Promise<Result<{ publicKey: Record<string, unknown> }>>;
-	passkeyAuthenticateFinish(response: Record<string, unknown>): Promise<Result<RevoAuthSession>>;
+	passkeyAuthenticateFinish(
+		response: Record<string, unknown>,
+	): Promise<Result<RevoAuthSession>>;
 	listPasskeys(): Promise<Result<ListResponse<Passkey>>>;
 	revokePasskey(id: string): Promise<Result<OkResponse>>;
 	totpSetup(): Promise<Result<TotpSetupResult>>;
@@ -103,12 +124,21 @@ export interface ClientAPI {
 	totpDisable(): Promise<Result<OkResponse>>;
 	magicRequest(input: MagicRequestInput): Promise<Result<OkResponse>>;
 	magicVerifyUrl(token: string): string;
-	linkAccount(provider: OAuthProvider, redirect?: string): Promise<Result<{ url: string }>>;
+	linkAccount(
+		provider: OAuthProvider,
+		redirect?: string,
+	): Promise<Result<{ url: string }>>;
 	unlinkAccount(provider: OAuthProvider): Promise<Result<OkResponse>>;
 	listOrgs(): Promise<Result<ListResponse<Organization>>>;
 	createOrg(input: CreateOrgInput): Promise<Result<Organization>>;
-	inviteMember(orgId: string, input: InviteMemberInput): Promise<Result<OkResponse>>;
-	acceptInvite(orgId: string, input: AcceptInviteInput): Promise<Result<OkResponse>>;
+	inviteMember(
+		orgId: string,
+		input: InviteMemberInput,
+	): Promise<Result<OkResponse>>;
+	acceptInvite(
+		orgId: string,
+		input: AcceptInviteInput,
+	): Promise<Result<OkResponse>>;
 	readonly config: Readonly<RevoAuthConfig>;
 }
 
@@ -158,7 +188,7 @@ export function createClient(rawConfig: RevoAuthConfig): ClientAPI {
 			...(opts.headers as Record<string, string> | undefined),
 		};
 		if (config.cookie !== undefined) {
-			headers['cookie'] = config.cookie;
+			headers.cookie = config.cookie;
 		}
 		if (MUTATING_METHODS.has(method)) {
 			const csrf = config.csrfToken ?? readCsrfFromDocument();
@@ -182,7 +212,10 @@ export function createClient(rawConfig: RevoAuthConfig): ClientAPI {
 					ok: false,
 					error: new ValidationError(
 						'Server response failed schema validation',
-						validated.error.issues.map((i) => ({ path: i.path, message: i.message })),
+						validated.error.issues.map((i) => ({
+							path: i.path,
+							message: i.message,
+						})),
 					),
 				};
 			}
@@ -203,12 +236,17 @@ export function createClient(rawConfig: RevoAuthConfig): ClientAPI {
 				if (status === 429) {
 					const retryHeader = err.response?.headers.get('retry-after');
 					const retryAfterSeconds =
-						retryHeader !== null && retryHeader !== undefined && retryHeader !== ''
+						retryHeader !== null &&
+						retryHeader !== undefined &&
+						retryHeader !== ''
 							? Number.parseInt(retryHeader, 10)
 							: undefined;
 					const opts: { requestId?: string; retryAfterSeconds?: number } = {};
 					if (e.request_id !== undefined) opts.requestId = e.request_id;
-					if (retryAfterSeconds !== undefined && !Number.isNaN(retryAfterSeconds)) {
+					if (
+						retryAfterSeconds !== undefined &&
+						!Number.isNaN(retryAfterSeconds)
+					) {
 						opts.retryAfterSeconds = retryAfterSeconds;
 					}
 					return new RateLimitedError(e.message, opts);
@@ -266,18 +304,21 @@ export function createClient(rawConfig: RevoAuthConfig): ClientAPI {
 				}),
 			),
 
-		signout: () =>
-			request('/v1/signout', okResponseSchema, { method: 'POST' }),
+		signout: () => request('/v1/signout', okResponseSchema, { method: 'POST' }),
 
 		session: async () => {
-			const r = await request('/v1/session', sessionNullableResponseSchema, { method: 'GET' });
+			const r = await request('/v1/session', sessionNullableResponseSchema, {
+				method: 'GET',
+			});
 			if (!r.ok) return r;
 			return { ok: true, data: r.data.session };
 		},
 
 		sessionRefresh: () =>
 			unwrapSession(
-				request('/v1/session/refresh', sessionResponseSchema, { method: 'POST' }),
+				request('/v1/session/refresh', sessionResponseSchema, {
+					method: 'POST',
+				}),
 			),
 
 		listSessions: () =>
@@ -322,28 +363,44 @@ export function createClient(rawConfig: RevoAuthConfig): ClientAPI {
 		},
 
 		passkeyRegisterBegin: () =>
-			request('/v1/passkey/register/begin', passkeyRegisterBeginResponseSchema, {
-				method: 'POST',
-			}),
+			request(
+				'/v1/passkey/register/begin',
+				passkeyRegisterBeginResponseSchema,
+				{
+					method: 'POST',
+				},
+			),
 
 		passkeyRegisterFinish: (response) =>
-			request('/v1/passkey/register/finish', passkeyRegisterFinishResponseSchema, {
-				method: 'POST',
-				body: { response },
-			}),
+			request(
+				'/v1/passkey/register/finish',
+				passkeyRegisterFinishResponseSchema,
+				{
+					method: 'POST',
+					body: { response },
+				},
+			),
 
 		passkeyAuthenticateBegin: (email) =>
-			request('/v1/passkey/authenticate/begin', passkeyAuthenticateBeginResponseSchema, {
-				method: 'POST',
-				body: email !== undefined ? { email } : {},
-			}),
+			request(
+				'/v1/passkey/authenticate/begin',
+				passkeyAuthenticateBeginResponseSchema,
+				{
+					method: 'POST',
+					body: email !== undefined ? { email } : {},
+				},
+			),
 
 		passkeyAuthenticateFinish: (response) =>
 			unwrapSession(
-				request('/v1/passkey/authenticate/finish', passkeyAuthenticateFinishResponseSchema, {
-					method: 'POST',
-					body: { response },
-				}),
+				request(
+					'/v1/passkey/authenticate/finish',
+					passkeyAuthenticateFinishResponseSchema,
+					{
+						method: 'POST',
+						body: { response },
+					},
+				),
 			),
 
 		listPasskeys: () =>
@@ -408,15 +465,23 @@ export function createClient(rawConfig: RevoAuthConfig): ClientAPI {
 			),
 
 		inviteMember: (orgId, input) =>
-			request(`/v1/orgs/${encodeURIComponent(orgId)}/invite`, okResponseSchema, {
-				method: 'POST',
-				body: input,
-			}),
+			request(
+				`/v1/orgs/${encodeURIComponent(orgId)}/invite`,
+				okResponseSchema,
+				{
+					method: 'POST',
+					body: input,
+				},
+			),
 
 		acceptInvite: (orgId, input) =>
-			request(`/v1/orgs/${encodeURIComponent(orgId)}/accept`, okResponseSchema, {
-				method: 'POST',
-				body: input,
-			}),
+			request(
+				`/v1/orgs/${encodeURIComponent(orgId)}/accept`,
+				okResponseSchema,
+				{
+					method: 'POST',
+					body: input,
+				},
+			),
 	};
 }

@@ -1,5 +1,5 @@
 import type { RevoAuthSession } from '@revo-auth/sdk-core';
-import { error, type RequestEvent } from '@sveltejs/kit';
+import { type RequestEvent, error } from '@sveltejs/kit';
 import { requireAuth } from './load.js';
 
 export type OrgRole = 'owner' | 'admin' | 'member' | 'viewer';

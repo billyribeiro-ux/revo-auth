@@ -21,9 +21,13 @@ export async function registerPasskey(
 	try {
 		// The server's `publicKey` is the PublicKeyCredentialCreationOptionsJSON.
 		const attestation = await startRegistration(
-			begin.data.publicKey as unknown as Parameters<typeof startRegistration>[0],
+			begin.data.publicKey as unknown as Parameters<
+				typeof startRegistration
+			>[0],
 		);
-		return client.passkeyRegisterFinish(attestation as unknown as Record<string, unknown>);
+		return client.passkeyRegisterFinish(
+			attestation as unknown as Record<string, unknown>,
+		);
 	} catch (err) {
 		return {
 			ok: false,
@@ -44,9 +48,13 @@ export async function authenticateWithPasskey(
 
 	try {
 		const assertion = await startAuthentication(
-			begin.data.publicKey as unknown as Parameters<typeof startAuthentication>[0],
+			begin.data.publicKey as unknown as Parameters<
+				typeof startAuthentication
+			>[0],
 		);
-		return client.passkeyAuthenticateFinish(assertion as unknown as Record<string, unknown>);
+		return client.passkeyAuthenticateFinish(
+			assertion as unknown as Record<string, unknown>,
+		);
 	} catch (err) {
 		return {
 			ok: false,
