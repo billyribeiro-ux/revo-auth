@@ -1,0 +1,5 @@
+import { createRevoAuthHandle } from '@revo-auth/sdk-sveltekit/server';
+import config from '../../../auth.config';
+
+export const revoAuth = createRevoAuthHandle(config);
+export { config as authConfig };

@@ -7,7 +7,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 pub const SESSION_COOKIE: &str = "__Host-revoauth.session";
-pub const CSRF_COOKIE: &str = "revo_csrf";
+pub const CSRF_COOKIE: &str = "__Host-revoauth.csrf";
 
 pub fn extract_session_token(headers: &HeaderMap) -> Option<String> {
     if let Some(auth) = headers.get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()) {

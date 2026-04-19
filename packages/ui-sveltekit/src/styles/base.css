@@ -1,0 +1,25 @@
+@layer base {
+	:root {
+		font-family:
+			system-ui,
+			-apple-system,
+			'Segoe UI',
+			Roboto,
+			Helvetica,
+			Arial,
+			sans-serif,
+			'Apple Color Emoji',
+			'Segoe UI Emoji';
+		line-height: 1.5;
+		color-scheme: light dark;
+		color: var(--text-primary);
+		background-color: var(--surface-base);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--accent-base);
+		outline-offset: 2px;
+	}
+}

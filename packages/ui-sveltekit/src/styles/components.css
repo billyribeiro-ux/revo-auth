@@ -1,0 +1,87 @@
+@layer components {
+	.btn-primary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2xs);
+		padding-block: var(--space-xs);
+		padding-inline: var(--space-md);
+		background: var(--accent-base);
+		color: var(--accent-text);
+		border: 0;
+		border-radius: var(--radius-md);
+		font-size: var(--type-base);
+		font-weight: 600;
+		cursor: pointer;
+		transition: background var(--motion-fast) var(--motion-ease);
+
+		&:hover:not(:disabled) {
+			background: var(--accent-hover);
+		}
+		&:focus-visible {
+			outline: 2px solid var(--accent-base);
+			outline-offset: 2px;
+		}
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+	}
+
+	.btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2xs);
+		padding-block: var(--space-xs);
+		padding-inline: var(--space-md);
+		background: var(--surface-raised);
+		color: var(--text-primary);
+		border: 1px solid oklch(85% 0.01 255);
+		border-radius: var(--radius-md);
+		font-size: var(--type-base);
+		font-weight: 500;
+		cursor: pointer;
+		transition:
+			background var(--motion-fast) var(--motion-ease),
+			border-color var(--motion-fast) var(--motion-ease);
+
+		&:hover:not(:disabled) {
+			background: var(--surface-sunken);
+		}
+		&:focus-visible {
+			outline: 2px solid var(--accent-base);
+			outline-offset: 2px;
+		}
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+	}
+
+	.input {
+		inline-size: 100%;
+		padding-block: var(--space-2xs);
+		padding-inline: var(--space-xs);
+		border: 1px solid oklch(85% 0.01 255);
+		border-radius: var(--radius-md);
+		font-size: var(--type-base);
+		background: var(--surface-raised);
+		color: var(--text-primary);
+		transition: border-color var(--motion-fast) var(--motion-ease);
+
+		&:focus-visible {
+			outline: 2px solid var(--accent-base);
+			outline-offset: 2px;
+			border-color: var(--accent-base);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.btn-primary,
+		.btn-secondary,
+		.input {
+			transition: none;
+		}
+	}
+}

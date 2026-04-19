@@ -52,3 +52,26 @@ pub async fn delete_for_user(pool: &sqlx::PgPool, user_id: Uuid) -> Result<(), s
         .await?;
     Ok(())
 }
+
+pub async fn set_recovery_codes(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    hashes: &[Vec<u8>],
+) -> Result<(), sqlx::Error> {
+    sqlx::query(r#"update totp_secrets set recovery_codes_hash = $2 where user_id = $1"#)
+        .bind(user_id)
+        .bind(hashes)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn get_recovery_codes(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+) -> Result<Option<Vec<Vec<u8>>>, sqlx::Error> {
+    sqlx::query_scalar(r#"select recovery_codes_hash from totp_secrets where user_id = $1"#)
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await
+}

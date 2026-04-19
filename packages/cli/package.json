@@ -1,0 +1,41 @@
+{
+	"name": "@revo-auth/cli",
+	"version": "0.1.0",
+	"type": "module",
+	"bin": {
+		"revo-auth": "./dist/bin.js"
+	},
+	"main": "./dist/bin.js",
+	"types": "./dist/bin.d.ts",
+	"files": ["dist", "src", "templates"],
+	"scripts": {
+		"build": "tsup",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"lint": "biome check src"
+	},
+	"dependencies": {
+		"@clack/prompts": "^0.8",
+		"citty": "^0.1",
+		"consola": "^3",
+		"defu": "^6",
+		"execa": "^9",
+		"handlebars": "^4",
+		"magicast": "^0.3",
+		"ofetch": "^1",
+		"pathe": "^1",
+		"picocolors": "^1",
+		"ts-morph": "^23",
+		"zod": "^3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1",
+		"@types/node": "^22",
+		"tsup": "^8",
+		"typescript": "^5.7",
+		"vitest": "^2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

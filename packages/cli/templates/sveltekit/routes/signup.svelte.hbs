@@ -1,0 +1,12 @@
+<script lang="ts">
+	import { SignupForm } from '@revo-auth/ui-sveltekit';
+	import { auth } from '$lib/auth/client';
+
+	let error = $state<string | null>(null);
+</script>
+
+<main class="auth-page">
+	<h1>Create an account</h1>
+	<SignupForm client={auth} on:error={(e) => (error = e.detail.message)} />
+	{#if error}<p class="auth-error">{error}</p>{/if}
+</main>

@@ -1,0 +1,9 @@
+import { defineProvider } from '@revo-auth/sdk-sveltekit/providers';
+
+export default defineProvider({
+	id: 'google',
+	enabled: true,
+	clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+	clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+	scope: ['openid', 'email', 'profile'],
+});

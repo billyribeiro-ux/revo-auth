@@ -1,0 +1,9 @@
+<script lang="ts">
+	import { VerifyEmailBanner } from '@revo-auth/ui-sveltekit';
+	import { auth } from '$lib/auth/client';
+</script>
+
+<main class="auth-page">
+	<h1>Verify your email</h1>
+	<VerifyEmailBanner client={auth} />
+</main>

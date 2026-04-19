@@ -1,0 +1,36 @@
+{
+	"name": "@revo-auth/sdk-core",
+	"version": "0.1.0",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": ["dist", "src"],
+	"scripts": {
+		"build": "tsup",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"lint": "biome check src"
+	},
+	"dependencies": {
+		"@simplewebauthn/browser": "^10",
+		"defu": "^6",
+		"ofetch": "^1",
+		"zod": "^3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1",
+		"tsup": "^8",
+		"typescript": "^5.7",
+		"vitest": "^2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

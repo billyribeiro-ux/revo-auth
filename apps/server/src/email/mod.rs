@@ -12,6 +12,15 @@ pub async fn send_verification(
     to: &str,
     verify_url: &str,
 ) -> Result<(), transport::EmailError> {
+    send_email_verify(transport, _cfg, to, verify_url).await
+}
+
+pub async fn send_email_verify(
+    transport: &dyn EmailTransport,
+    _cfg: &Config,
+    to: &str,
+    verify_url: &str,
+) -> Result<(), transport::EmailError> {
     let subject = "Verify your email";
     let text = templates::verify_text(verify_url);
     let html = templates::verify_html(verify_url);
@@ -21,7 +30,7 @@ pub async fn send_verification(
             subject: subject.to_string(),
             text_body: text,
             html_body: html,
-            meta: json!({}),
+            meta: json!({"kind": "email_verify"}),
         })
         .await
 }
@@ -41,7 +50,7 @@ pub async fn send_password_reset(
             subject: subject.to_string(),
             text_body: text,
             html_body: html,
-            meta: json!({}),
+            meta: json!({"kind": "password_reset"}),
         })
         .await
 }
@@ -61,7 +70,28 @@ pub async fn send_magic_link(
             subject: subject.to_string(),
             text_body: text,
             html_body: html,
-            meta: json!({}),
+            meta: json!({"kind": "magic"}),
+        })
+        .await
+}
+
+pub async fn send_org_invite(
+    transport: &dyn EmailTransport,
+    _cfg: &Config,
+    to: &str,
+    org_name: &str,
+    accept_url: &str,
+) -> Result<(), transport::EmailError> {
+    let subject = "You've been invited";
+    let text = templates::invite_text(accept_url, org_name);
+    let html = templates::invite_html(accept_url, org_name);
+    transport
+        .send(EmailMessage {
+            to: to.to_string(),
+            subject: subject.to_string(),
+            text_body: text,
+            html_body: html,
+            meta: json!({"kind": "org_invite"}),
         })
         .await
 }

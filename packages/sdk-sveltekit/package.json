@@ -1,0 +1,43 @@
+{
+	"name": "@revo-auth/sdk-sveltekit",
+	"version": "0.1.0",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./client": {
+			"types": "./dist/client.svelte.d.ts",
+			"svelte": "./dist/client.svelte.js",
+			"default": "./dist/client.svelte.js"
+		}
+	},
+	"files": ["dist", "src"],
+	"scripts": {
+		"build": "tsup",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"lint": "biome check src"
+	},
+	"peerDependencies": {
+		"@sveltejs/kit": "^2.49",
+		"svelte": "^5"
+	},
+	"dependencies": {
+		"@revo-auth/sdk-core": "workspace:*"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1",
+		"@sveltejs/kit": "^2.49",
+		"svelte": "^5",
+		"tsup": "^8",
+		"typescript": "^5.7",
+		"vitest": "^2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

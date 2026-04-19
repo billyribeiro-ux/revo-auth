@@ -1,43 +1,109 @@
 # Revo-Auth
 
-Production-oriented authentication platform: Rust (Axum) auth server, TypeScript SDKs, SvelteKit adapter, CLI, and UI components — as specified in [`revo-auth-nuclear-prompt.md`](./revo-auth-nuclear-prompt.md).
+> A batteries-included, production-grade authentication platform for the Svelte 5 era:
+> Rust auth server, TypeScript SDKs, SvelteKit adapter, UI components, and a CLI that
+> scaffolds code you **own** in your repo.
 
-## Current status
+<!-- logo placeholder: assets/logo.svg -->
 
-**Implemented (Rust server, `apps/server`):**
+[![CI](https://github.com/revo-auth/revo-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/revo-auth/revo-auth/actions/workflows/ci.yml)
+[![Security](https://github.com/revo-auth/revo-auth/actions/workflows/security.yml/badge.svg)](https://github.com/revo-auth/revo-auth/actions/workflows/security.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-- Postgres schema and SQLx migrations (`0001`–`0005`) aligned with the nuclear prompt
-- Multi-tenant resolution via `X-Revo-App-Id` + `X-Revo-App-Public-Key` or `Origin` + app id
-- Email/password: signup, signin, signout, session read/refresh, list/revoke sessions
-- Argon2id (m=65536, t=3, p=1), opaque session tokens (SHA-256 in DB), `__Host-revoauth.session` cookie support
-- Admin API: list/create/patch apps (master key: `X-Revo-Master-Key`)
-- Password reset request/confirm with enumeration-safe timing and verification tokens
-- Redis-backed session revocation markers, readiness (`/ready`) checking DB + Redis
-- Structured logging (tracing); email hooks with a log transport (SMTP/Resend wiring is the next step)
+Revo-Auth is built to the contract in
+[`revo-auth-nuclear-prompt.md`](./revo-auth-nuclear-prompt.md): a multi-tenant auth
+server with opaque sessions and ES256 service JWTs, CLI-scaffolded SvelteKit
+integration (you own the routes and UI), PE7 design tokens, and a distroless deploy
+target.
 
-**Not yet implemented in this repo (per full spec):**
+## Architecture
 
-- Remaining `/v1/*` routes (OAuth, WebAuthn, TOTP, magic links, orgs, account linking), CSRF + tower-governor rate limits as specified, full OTEL pipeline, integration/E2E suites, `packages/*`, Starlight docs, `examples/sveltekit-demo`, CLI templates, CI/release automation to the letter of the prompt
+```mermaid
+flowchart LR
+  Browser["SvelteKit app<br/>(packages/sdk-sveltekit + ui-sveltekit)"]
+  CLI["@revo-auth/cli<br/>scaffolds routes & UI"]
+  Server["apps/server (Rust, Axum)<br/>opaque sessions + ES256 JWT"]
+  PG[(Postgres 16)]
+  Redis[(Redis 7)]
+  OAuth["OAuth / OIDC<br/>providers"]
+  Mail["SMTP / Resend"]
 
-See the nuclear prompt for the complete 21-phase plan and quality gates.
-
-## Run the server locally
-
-1. Start Postgres and Redis.
-2. Copy `apps/server/.env.example` to `apps/server/.env` and set real values (JWT PEMs required for any JWT features you add).
-3. From repo root:
-
-```bash
-cd apps/server
-export $(grep -v '^#' .env | xargs)
-cargo run --release
+  CLI --> Browser
+  Browser -- "HTTPS + __Host- cookie" --> Server
+  Server --> PG
+  Server --> Redis
+  Server -- "OIDC discovery" --> OAuth
+  Server -- "magic link / reset" --> Mail
 ```
 
-- Health: `GET http://localhost:8787/health`
-- Readiness: `GET http://localhost:8787/ready`
+## Quickstart
 
-Create an app with the admin API (`X-Revo-Master-Key`), then call `/v1/*` with tenant headers as described in the prompt.
+```bash
+# 1. Scaffold a SvelteKit app with routes, actions, and PE7 UI
+pnpm dlx @revo-auth/cli init my-app
+
+# 2. Bring the auth server up (distroless image, migrations auto-run)
+docker run --rm -p 8080:8080 --env-file apps/server/.env \
+  ghcr.io/revo-auth/revo-auth-server:latest
+
+# 3. Start the app
+cd my-app && pnpm dev
+```
+
+Full setup, key generation, and Fly.io deploy instructions live in
+[`apps/server/README.md`](./apps/server/README.md).
+
+## Feature matrix
+
+Comparison with [BetterAuth](https://www.better-auth.com/) for orientation only - they
+are adjacent projects with different trade-offs. Legend: checked = shipped,
+warning = partial/behind flag, cross = not available.
+
+| Capability | Revo-Auth | BetterAuth |
+| --- | :---: | :---: |
+| Svelte 5 runes idiomatic SDK | checked | warning |
+| CLI scaffolds code you own in-repo | checked | cross |
+| PE7 CSS design tokens for UI primitives | checked | cross |
+| Multi-tenant apps (`X-Revo-App-Id`) | checked | warning |
+| OAuth / OIDC (Google, GitHub, custom) | checked | checked |
+| WebAuthn / passkeys | checked | checked |
+| TOTP (RFC 6238) | checked | checked |
+| Magic links | checked | checked |
+| Organisations + RBAC | checked | checked |
+| Audit log | checked | warning |
+| Opaque sessions + ES256 service JWTs | checked | warning |
+| Distroless Docker image (< 60MB) | checked | cross |
+| Fly.io-ready (`apps/server/fly.toml`) | checked | cross |
+| Server implementation language | Rust | TypeScript |
+
+## Packages
+
+| Package | Description |
+| --- | --- |
+| `apps/server` | Rust (Axum) auth server with Postgres + Redis, the single source of truth. |
+| `apps/docs` | Starlight documentation site (deployed via `release.yml`). |
+| `packages/sdk-core` | Framework-agnostic client SDK (fetch + types). |
+| `packages/sdk-sveltekit` | SvelteKit actions, hooks, and load helpers. |
+| `packages/ui-sveltekit` | Svelte 5 UI primitives with PE7 CSS tokens. |
+| `packages/cli` | `@revo-auth/cli` - scaffolds routes, UI, and env into your repo. |
+| `examples/sveltekit-demo` | Reference app used by Playwright in CI. |
+
+### Scaffold a new app
+
+```bash
+pnpm dlx @revo-auth/cli init
+```
+
+The CLI writes auth routes, UI components, and environment hints directly into your
+repo - you review, edit, and commit them like any other code. No magic runtime glue.
+
+## Documentation
+
+- Architecture and roadmap: [`revo-auth-nuclear-prompt.md`](./revo-auth-nuclear-prompt.md)
+- Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- Security policy: [`SECURITY.md`](./SECURITY.md)
+- Hosted docs: `https://revo-auth.dev/docs` (built from `apps/docs`).
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+[MIT](./LICENSE) (C) Revo-Auth contributors.

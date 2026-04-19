@@ -1,0 +1,29 @@
+# Build artifacts
+target/
+**/target/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.turbo/
+**/.turbo/
+
+# VCS / CI
+.git/
+.github/
+.gitignore
+
+# Workspace-local things the server image does not need
+apps/docs/
+packages/
+examples/
+
+# Docs and local notes
+*.md
+LICENSE
+
+# Secrets / local env
+.env
+.env.*
+*.pem
+*.key

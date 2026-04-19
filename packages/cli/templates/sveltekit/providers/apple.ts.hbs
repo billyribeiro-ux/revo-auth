@@ -1,0 +1,11 @@
+import { defineProvider } from '@revo-auth/sdk-sveltekit/providers';
+
+export default defineProvider({
+	id: 'apple',
+	enabled: false,
+	clientId: process.env.APPLE_CLIENT_ID ?? '',
+	teamId: process.env.APPLE_TEAM_ID ?? '',
+	keyId: process.env.APPLE_KEY_ID ?? '',
+	privateKey: process.env.APPLE_PRIVATE_KEY ?? '',
+	scope: ['name', 'email'],
+});

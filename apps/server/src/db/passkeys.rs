@@ -95,3 +95,22 @@ pub async fn update_sign_count(
         .await?;
     Ok(())
 }
+
+pub async fn update_passkey_after_auth(
+    pool: &sqlx::PgPool,
+    credential_id: &[u8],
+    sign_count: i64,
+    backup_state: bool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"update passkeys
+           set sign_count = $2, backup_state = $3, last_used_at = now()
+           where credential_id = $1"#,
+    )
+    .bind(credential_id)
+    .bind(sign_count)
+    .bind(backup_state)
+    .execute(pool)
+    .await?;
+    Ok(())
+}

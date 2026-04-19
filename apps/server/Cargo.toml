@@ -58,6 +58,9 @@ once_cell = "1"
 dashmap = "6"
 http-body-util = "0.1"
 bytes = "1"
+openidconnect = "3"
+lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1-rustls-tls", "builder", "hostname"] }
+html-escape = "0.2"
 
 [dev-dependencies]
 testcontainers = "0.23"

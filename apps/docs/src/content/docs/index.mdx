@@ -1,0 +1,70 @@
+---
+title: Revo-Auth
+description: Production-grade, self-hostable authentication for SvelteKit.
+template: splash
+hero:
+  tagline: The self-hostable auth stack for SvelteKit. Rust on the backend, typed SDKs on the frontend, opinionated for security, joyful to run.
+  actions:
+    - text: Quickstart
+      link: /quickstart/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/revo-auth/revo-auth
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## Why Revo-Auth
+
+<CardGrid>
+  <Card title="SvelteKit-native" icon="rocket">
+    Hooks, load guards, typed session store, and UI primitives ship as a first-class package. Zero glue code.
+  </Card>
+  <Card title="Secure by default" icon="approve-check">
+    `__Host-` cookies, SHA-256 token hashing at rest, Redis revocation, passkeys, TOTP, and per-app origin validation.
+  </Card>
+  <Card title="Self-hostable" icon="seti:docker">
+    One Rust binary, Postgres, Redis. Deploy to Fly.io, Docker, or bare metal. No vendor lock-in, no per-seat pricing.
+  </Card>
+  <Card title="Multi-tenant" icon="puzzle">
+    The `apps` table isolates tenants. Every request carries `X-Revo-App-Id`; origins are validated per-app.
+  </Card>
+</CardGrid>
+
+## Architecture
+
+```mermaid
+graph TD
+  SK[SvelteKit App] -->|@revo-auth/sdk-sveltekit| AS[auth.revo-auth.dev]
+  AS --> PG[(Postgres)]
+  AS --> RD[(Redis)]
+  OP[OAuth Providers] <--> AS
+```
+
+The SvelteKit app never talks to Postgres or Redis directly. It calls the Revo-Auth server over HTTPS using the typed SDK. The server owns sessions, token hashing, and provider callbacks. Redis exists solely to make revocation O(1); Postgres is the source of truth.
+
+## What you get
+
+- **Sessions** — opaque tokens, SHA-256 hashed at rest, 14-day rolling expiry.
+- **Passkeys** — WebAuthn via `@simplewebauthn`, device-bound.
+- **MFA** — TOTP, recovery codes, step-up prompts on sensitive routes.
+- **RBAC** — roles and permissions scoped per app.
+- **Audit log** — append-only, tenant-scoped, queryable from the dashboard.
+- **OAuth** — Google, GitHub, Microsoft, Discord, Apple out of the box.
+
+## Next steps
+
+<CardGrid>
+  <Card title="Start building" icon="pencil">
+    Follow the [quickstart](/quickstart/) and have login working in five minutes.
+  </Card>
+  <Card title="Learn the model" icon="open-book">
+    Read the [concepts](/concepts/sessions/) to understand sessions, tenancy, and MFA.
+  </Card>
+  <Card title="Deploy" icon="rocket">
+    Ship to [Fly.io](/deployment/fly-io/) with Neon Postgres and Upstash Redis.
+  </Card>
+</CardGrid>

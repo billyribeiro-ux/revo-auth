@@ -1,0 +1,69 @@
+/* Design tokens copied from @revo-auth/ui-sveltekit to avoid workspace coupling. */
+@layer tokens {
+  :root {
+    /* Semantic surface */
+    --surface-base: oklch(99% 0.002 255);
+    --surface-raised: oklch(100% 0 0);
+    --surface-sunken: oklch(97% 0.003 255);
+
+    /* Semantic text */
+    --text-primary: oklch(22% 0.02 255);
+    --text-secondary: oklch(45% 0.015 255);
+    --text-muted: oklch(62% 0.012 255);
+
+    /* Semantic accent */
+    --accent-base: oklch(62% 0.19 259);
+    --accent-hover: oklch(56% 0.21 259);
+    --accent-text: oklch(100% 0 0);
+
+    /* Semantic status */
+    --status-success: oklch(65% 0.17 155);
+    --status-warning: oklch(78% 0.17 75);
+    --status-danger: oklch(62% 0.22 27);
+
+    /* Fluid rhythm */
+    --space-3xs: clamp(0.25rem, 0.2rem + 0.2vw, 0.375rem);
+    --space-2xs: clamp(0.5rem, 0.4rem + 0.4vw, 0.75rem);
+    --space-xs: clamp(0.75rem, 0.6rem + 0.6vw, 1rem);
+    --space-sm: clamp(1rem, 0.8rem + 0.8vw, 1.5rem);
+    --space-md: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+    --space-lg: clamp(2rem, 1.6rem + 1.6vw, 3rem);
+    --space-xl: clamp(3rem, 2.4rem + 2.4vw, 4.5rem);
+
+    /* Fluid type */
+    --type-sm: clamp(0.875rem, 0.83rem + 0.22vw, 0.95rem);
+    --type-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --type-lg: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+    --type-xl: clamp(1.5rem, 1.35rem + 0.75vw, 2rem);
+
+    /* Motion */
+    --motion-fast: 140ms;
+    --motion-base: 220ms;
+    --motion-slow: 420ms;
+    --motion-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+    /* Radii */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-full: 9999px;
+
+    /* Elevation */
+    --elev-1: 0 1px 2px oklch(20% 0.02 255 / 0.06);
+    --elev-2: 0 4px 10px oklch(20% 0.02 255 / 0.08);
+    --elev-3: 0 12px 28px oklch(20% 0.02 255 / 0.12);
+
+    color-scheme: light dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-base: oklch(16% 0.015 255);
+      --surface-raised: oklch(20% 0.017 255);
+      --surface-sunken: oklch(12% 0.012 255);
+      --text-primary: oklch(96% 0.01 255);
+      --text-secondary: oklch(80% 0.015 255);
+      --text-muted: oklch(65% 0.015 255);
+    }
+  }
+}

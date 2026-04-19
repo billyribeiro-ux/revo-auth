@@ -40,7 +40,7 @@ pub async fn signout(
     .await
     .map_err(|_| ApiError::Internal)?;
     let clear_sess =
-        format!("{}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0", auth::SESSION_COOKIE);
+        format!("{}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure", auth::SESSION_COOKIE);
     let clear_csrf = clear_csrf_cookie(state.config.cookie_secure);
     let mut res = StatusCode::NO_CONTENT.into_response();
     res.headers_mut().append(

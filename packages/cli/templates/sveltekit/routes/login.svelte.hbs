@@ -1,0 +1,30 @@
+<script lang="ts">
+	import { LoginForm{{#if (includes methods "google")}}, OAuthButton{{/if}}{{#if (includes methods "passkeys")}}, PasskeyButton{{/if}}{{#if (includes methods "magic-link")}}, MagicLinkForm{{/if}} } from '@revo-auth/ui-sveltekit';
+	import { auth } from '$lib/auth/client';
+
+	let error = $state<string | null>(null);
+</script>
+
+<main class="auth-page">
+	<h1>Sign in</h1>
+{{#if (includes methods "email")}}
+	<LoginForm client={auth} on:error={(e) => (error = e.detail.message)} />
+{{/if}}
+{{#if (includes methods "magic-link")}}
+	<MagicLinkForm client={auth} />
+{{/if}}
+{{#if (includes methods "passkeys")}}
+	<PasskeyButton client={auth} />
+{{/if}}
+{{#if (includes methods "google")}}
+	<OAuthButton provider="google" client={auth} />
+{{/if}}
+{{#if (includes methods "github")}}
+	<OAuthButton provider="github" client={auth} />
+{{/if}}
+{{#if (includes methods "microsoft")}}
+	<OAuthButton provider="microsoft" client={auth} />
+{{/if}}
+
+	{#if error}<p class="auth-error">{error}</p>{/if}
+</main>

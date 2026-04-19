@@ -1,0 +1,10 @@
+import { requireSession } from '@revo-auth/sdk-sveltekit/server';
+import type { RequestEvent } from '@sveltejs/kit';
+
+/**
+ * Use in `+page.server.ts` / `+layout.server.ts` to guard routes.
+ * Redirects unauthenticated users to /auth/login.
+ */
+export async function requireAuth(event: RequestEvent) {
+	return await requireSession(event, { redirectTo: '/auth/login' });
+}

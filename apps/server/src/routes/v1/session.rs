@@ -57,32 +57,24 @@ pub fn session_out(sess: &SessionRow, user: &UserRow) -> SessionOut {
     }
 }
 
-pub fn session_cookie_value(token: &str, max_age_secs: i64, secure: bool) -> String {
-    let mut c = format!(
-        "{}={token}; Path=/; HttpOnly; SameSite=Lax; Max-Age={max_age_secs}",
+pub fn session_cookie_value(token: &str, max_age_secs: i64, _secure: bool) -> String {
+    // __Host- prefix mandates Path=/, no Domain, and Secure — always.
+    format!(
+        "{}={token}; Path=/; HttpOnly; SameSite=Lax; Max-Age={max_age_secs}; Secure",
         auth::SESSION_COOKIE
-    );
-    if secure {
-        c.push_str("; Secure");
-    }
-    c
+    )
 }
 
-pub fn csrf_cookie_value(token: &str, max_age_secs: i64, secure: bool) -> String {
-    let mut c =
-        format!("{}={token}; Path=/; SameSite=Lax; Max-Age={max_age_secs}", auth::CSRF_COOKIE);
-    if secure {
-        c.push_str("; Secure");
-    }
-    c
+pub fn csrf_cookie_value(token: &str, max_age_secs: i64, _secure: bool) -> String {
+    // __Host- prefix mandates Path=/, no Domain, and Secure — always.
+    format!(
+        "{}={token}; Path=/; SameSite=Lax; Max-Age={max_age_secs}; Secure",
+        auth::CSRF_COOKIE
+    )
 }
 
-pub fn clear_csrf_cookie(secure: bool) -> String {
-    let mut c = format!("{}=; Path=/; SameSite=Lax; Max-Age=0", auth::CSRF_COOKIE);
-    if secure {
-        c.push_str("; Secure");
-    }
-    c
+pub fn clear_csrf_cookie(_secure: bool) -> String {
+    format!("{}=; Path=/; SameSite=Lax; Max-Age=0; Secure", auth::CSRF_COOKIE)
 }
 
 pub async fn issue_session(

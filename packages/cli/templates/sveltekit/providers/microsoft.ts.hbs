@@ -1,0 +1,10 @@
+import { defineProvider } from '@revo-auth/sdk-sveltekit/providers';
+
+export default defineProvider({
+	id: 'microsoft',
+	enabled: true,
+	clientId: process.env.MICROSOFT_CLIENT_ID ?? '',
+	clientSecret: process.env.MICROSOFT_CLIENT_SECRET ?? '',
+	tenant: process.env.MICROSOFT_TENANT ?? 'common',
+	scope: ['openid', 'email', 'profile'],
+});

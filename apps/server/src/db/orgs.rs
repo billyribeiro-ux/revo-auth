@@ -42,3 +42,12 @@ pub async fn list_orgs_for_user(
     .fetch_all(pool)
     .await
 }
+
+pub async fn get_by_id(pool: &sqlx::PgPool, id: Uuid) -> Result<Option<OrgRow>, sqlx::Error> {
+    sqlx::query_as::<_, OrgRow>(
+        r#"select id, app_id, slug, name, created_at from organizations where id = $1"#,
+    )
+    .bind(id)
+    .fetch_optional(pool)
+    .await
+}

@@ -1,0 +1,42 @@
+{
+	"name": "@revo-auth/ui-sveltekit",
+	"version": "0.1.0",
+	"type": "module",
+	"svelte": "./src/index.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./styles/*.css": "./src/styles/*.css"
+	},
+	"files": ["dist", "src"],
+	"scripts": {
+		"build": "svelte-package",
+		"typecheck": "svelte-check --tsconfig ./tsconfig.json",
+		"test": "vitest run",
+		"lint": "biome check src"
+	},
+	"peerDependencies": {
+		"svelte": "^5"
+	},
+	"dependencies": {
+		"@revo-auth/sdk-core": "workspace:*",
+		"zod": "^3"
+	},
+	"devDependencies": {
+		"@sveltejs/package": "^2",
+		"svelte": "^5",
+		"svelte-check": "^4",
+		"typescript": "^5.7",
+		"vitest": "^2",
+		"@testing-library/svelte": "^5",
+		"@iconify-json/ph": "^1",
+		"unplugin-icons": "^0.19",
+		"@biomejs/biome": "^1"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

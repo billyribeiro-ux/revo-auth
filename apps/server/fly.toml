@@ -1,0 +1,36 @@
+app = "revo-auth"
+primary_region = "ord"
+
+[build]
+  dockerfile = "./Dockerfile"
+  ignorefile = "./.dockerignore"
+
+[env]
+  REVO_AUTH_HOST = "0.0.0.0"
+  REVO_AUTH_PORT = "8080"
+  RUST_LOG = "info"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[http_service.concurrency]
+  type = "requests"
+  hard_limit = 500
+  soft_limit = 400
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/health"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512

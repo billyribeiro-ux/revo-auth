@@ -1,0 +1,19 @@
+/* Site overrides that map Starlight's theme onto Revo-Auth tokens. */
+:root {
+  --sl-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --sl-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+:root[data-theme="dark"] {
+  --sl-color-accent-low: oklch(30% 0.1 259);
+  --sl-color-accent: oklch(62% 0.19 259);
+  --sl-color-accent-high: oklch(82% 0.12 259);
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: oklch(92% 0.05 259);
+  --sl-color-accent: oklch(56% 0.21 259);
+  --sl-color-accent-high: oklch(36% 0.15 259);
+}

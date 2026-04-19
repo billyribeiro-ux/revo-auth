@@ -1,0 +1,6 @@
+import { sequence } from '@sveltejs/kit/hooks';
+import { revoAuth } from '$lib/auth/server';
+import type { Handle } from '@sveltejs/kit';
+
+/* revo-auth:handle */
+export const handle: Handle = sequence(revoAuth);

@@ -1,0 +1,57 @@
+@layer reset {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html,
+	body {
+		margin: 0;
+	}
+
+	body,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p,
+	figure,
+	blockquote,
+	dl,
+	dd {
+		margin: 0;
+	}
+
+	ul,
+	ol {
+		padding: 0;
+	}
+
+	img,
+	svg,
+	video,
+	canvas {
+		display: block;
+		max-inline-size: 100%;
+		block-size: auto;
+	}
+
+	button {
+		font: inherit;
+		color: inherit;
+	}
+
+	input,
+	textarea,
+	select {
+		font: inherit;
+		color: inherit;
+	}
+
+	:where([hidden]) {
+		display: none;
+	}
+}

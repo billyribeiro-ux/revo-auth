@@ -1,0 +1,5 @@
+import { createAuthClient } from '@revo-auth/sdk-sveltekit/client';
+import config from '../../../auth.config';
+
+export const auth = createAuthClient(config);
+export type AuthClient = typeof auth;

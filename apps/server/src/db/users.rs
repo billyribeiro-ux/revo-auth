@@ -84,3 +84,84 @@ pub async fn verify_email(pool: &sqlx::PgPool, user_id: Uuid) -> Result<(), sqlx
         .await?;
     Ok(())
 }
+
+pub async fn list_by_app(
+    pool: &sqlx::PgPool,
+    app_id: Uuid,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<UserRow>, sqlx::Error> {
+    sqlx::query_as::<_, UserRow>(
+        r#"select id, app_id, email, email_verified_at, password_hash, name, image_url,
+                  custom_fields, banned_at, created_at, updated_at
+           from users where app_id = $1 order by created_at desc limit $2 offset $3"#,
+    )
+    .bind(app_id)
+    .bind(limit)
+    .bind(offset)
+    .fetch_all(pool)
+    .await
+}
+
+pub async fn set_banned(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    banned: bool,
+) -> Result<(), sqlx::Error> {
+    let q = if banned {
+        r#"update users set banned_at = now(), updated_at = now() where id = $1"#
+    } else {
+        r#"update users set banned_at = null, updated_at = now() where id = $1"#
+    };
+    sqlx::query(q).bind(user_id).execute(pool).await?;
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub async fn insert_oauth_user(
+    pool: &sqlx::PgPool,
+    id: Uuid,
+    app_id: Uuid,
+    email: &str,
+    email_verified: bool,
+    name: Option<&str>,
+    image_url: Option<&str>,
+) -> Result<UserRow, sqlx::Error> {
+    sqlx::query_as::<_, UserRow>(
+        r#"insert into users (id, app_id, email, email_verified_at, name, image_url)
+     values ($1,$2,$3::citext, case when $4 then now() else null end, $5, $6)
+     returning id, app_id, email, email_verified_at, password_hash, name, image_url, custom_fields, banned_at, created_at, updated_at"#,
+    )
+    .bind(id)
+    .bind(app_id)
+    .bind(email)
+    .bind(email_verified)
+    .bind(name)
+    .bind(image_url)
+    .fetch_one(pool)
+    .await
+}
+
+pub async fn update_profile_if_missing(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    name: Option<&str>,
+    image_url: Option<&str>,
+    email_verified: bool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"update users
+           set name = coalesce(name, $2),
+               image_url = coalesce(image_url, $3),
+               email_verified_at = case when $4 and email_verified_at is null then now() else email_verified_at end,
+               updated_at = now()
+           where id = $1"#,
+    )
+    .bind(user_id)
+    .bind(name)
+    .bind(image_url)
+    .bind(email_verified)
+    .execute(pool)
+    .await?;
+    Ok(())
+}

@@ -1,0 +1,30 @@
+{
+	"name": "sveltekit-demo",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"lint": "biome check src",
+		"e2e": "playwright test"
+	},
+	"dependencies": {
+		"@revo-auth/sdk-core": "workspace:*",
+		"@revo-auth/sdk-sveltekit": "workspace:*",
+		"@revo-auth/ui-sveltekit": "workspace:*"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1",
+		"@playwright/test": "^1.48",
+		"@sveltejs/adapter-node": "^5",
+		"@sveltejs/kit": "^2.49",
+		"@sveltejs/vite-plugin-svelte": "^4",
+		"svelte": "^5",
+		"svelte-check": "^4",
+		"typescript": "^5.7",
+		"vite": "^5"
+	}
+}

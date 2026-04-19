@@ -78,3 +78,18 @@ pub async fn touch(pool: &sqlx::PgPool, id: Uuid) -> Result<(), sqlx::Error> {
         .await?;
     Ok(())
 }
+
+pub async fn revoke_all_for_user(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+) -> Result<Vec<SessionRow>, sqlx::Error> {
+    sqlx::query_as::<_, SessionRow>(
+        r#"update sessions set revoked_at = now()
+           where user_id = $1 and revoked_at is null
+           returning id, user_id, token_hash, user_agent, ip::text as ip,
+                     expires_at, created_at, last_used_at, revoked_at"#,
+    )
+    .bind(user_id)
+    .fetch_all(pool)
+    .await
+}
